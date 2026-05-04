@@ -29,16 +29,9 @@ class _SplashViewState extends State<SplashView> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.flutter_dash, size: 96, color: Colors.white),
+            Image.asset('assets/images/logo.png', width: MediaQuery.of(context).size.width * 100, 
+            fit: BoxFit.contain),
             SizedBox(height: 16),
-            Text(
-              'Srint 1 Sample',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            )
           ],
         ),
       ),
