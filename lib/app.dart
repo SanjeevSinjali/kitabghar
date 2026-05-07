@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:kitabghar/views/container_view.dart';
+import 'package:kitabghar/views/flexible_expanded_view.dart';
+// import 'package:kitabghar/views/image_view.dart';
+// import 'package:kitabghar/views/mediaquery_view.dart';
 // import 'package:kitabghar/views/splash_view.dart';
 
 class App extends StatelessWidget {
@@ -10,7 +12,7 @@ class App extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(colorSchemeSeed: Colors.indigo, useMaterial3: true),
-      home: ContainerView(),
+      home: FlexibleExpandedView(),
     );
   }
 } 
