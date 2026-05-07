@@ -13,14 +13,15 @@ class _SplashViewState extends State<SplashView> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 3), (){
-      if(!mounted) return;
+    Timer(const Duration(seconds: 5), () {
+      if (!mounted) return;
       Navigator.pushReplacement(
-        context, 
+        context,
         MaterialPageRoute(builder: (_) => const OnboardingView()),
-        );
+      );
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,9 +30,12 @@ class _SplashViewState extends State<SplashView> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset('assets/images/logo.png', width: MediaQuery.of(context).size.width * 100, 
-            fit: BoxFit.contain),
-            SizedBox(height: 16),
+            Image.asset(
+              'assets/images/logo.png',
+              width: 505,
+              height: 505,
+              fit: BoxFit.fill,
+            ),
           ],
         ),
       ),
