@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kitabghar/views/login_view.dart';
 
-
 class OnboardingView extends StatefulWidget {
   const OnboardingView({super.key});
 
@@ -29,21 +28,24 @@ class _OnboardingViewState extends State<OnboardingView> {
 
   static const List<_OnboardingPage> _pages = [
     _OnboardingPage(
-      icon: Icons.explore,
-      title: 'Discover',
-      description: 'Find new things and explore everything we offer.',
+      icon: Icons.menu_book,
+      title: 'Buy Used Books',
+      description:
+          'Find affordable second-hand books from students and readers near you.',
       color: Colors.indigo,
     ),
     _OnboardingPage(
-      icon: Icons.bolt,
-      title: 'Fast & Easy',
-      description: 'A smooth experience built for speed and simplicity.',
+      icon: Icons.sell,
+      title: 'Sell Your Books',
+      description:
+          'Give your old books a new home. List them in seconds and earn cash.',
       color: Colors.deepOrange,
     ),
     _OnboardingPage(
-      icon: Icons.lock,
-      title: 'Secure',
-      description: 'Your data stays private and protected at every step.',
+      icon: Icons.handshake,
+      title: 'Trade & Connect',
+      description:
+          'Swap books with others in your community and grow your reading list for free.',
       color: Colors.teal,
     ),
   ];
