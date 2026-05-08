@@ -38,7 +38,7 @@ class _OnboardingViewState extends State<OnboardingView> {
       icon: Icons.sell,
       title: 'Sell Your Books',
       description:
-          'Give your old books a new home. List them in seconds and earn cash.',
+          'Give your old books a new home.',
       color: Colors.deepOrange,
     ),
     _OnboardingPage(
