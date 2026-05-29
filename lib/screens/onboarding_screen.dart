@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kitabghar/views/login_view.dart';
+import 'package:kitabghar/screens/login_screen.dart';
 
 class OnboardingView extends StatefulWidget {
   const OnboardingView({super.key});

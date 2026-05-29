@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kitabghar/views/dashboard_view.dart';
-import 'package:kitabghar/views/signup_view.dart';
+import 'package:kitabghar/screens/bottomscreen/dashboard_screen.dart';
+import 'package:kitabghar/screens/signup_screen.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -26,7 +26,7 @@ class _LoginViewState extends State<LoginView> {
   void _login() {
     if (_formKey.currentState?.validate() ?? false) {
       Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (_) => const DashboardView()));
+          MaterialPageRoute(builder: (_) => const DashboardScreen()));
     }
   }
 
