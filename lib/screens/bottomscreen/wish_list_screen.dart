@@ -5,6 +5,13 @@ class WishListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return const Center(
+      child: Text('I am Wish List Screen',
+      style: TextStyle(
+        fontFamily: 'Montserrat',
+        fontSize: 18,
+      ),
+      ),
+    );
   }
 }

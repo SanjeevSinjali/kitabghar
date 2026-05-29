@@ -5,6 +5,15 @@ class ExploreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return const Center(
+      child: Text(
+        'I am Explore Screen',
+        style: TextStyle(
+          fontFamily: 'Montserrat',
+          fontSize: 18,
+          fontWeight: FontWeight.w400,
+        ),
+      ),
+    );
   }
 }

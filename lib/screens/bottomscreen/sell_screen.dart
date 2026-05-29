@@ -5,6 +5,12 @@ class SellScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return const Center(
+      child: Text('I am Sell Screen',
+      style: TextStyle(
+        fontFamily: 'Montserrat',
+        fontSize: 18,
+      ),),
+    );
   }
 }
