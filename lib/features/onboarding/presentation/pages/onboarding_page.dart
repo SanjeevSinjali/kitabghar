@@ -28,24 +28,25 @@ class _OnboardingViewState extends State<OnboardingView> {
 
   static const List<_OnboardingPage> _pages = [
     _OnboardingPage(
-      icon: Icons.menu_book,
-      title: 'Buy Used Books',
+      icon: Icons.auto_stories_rounded,
+      title: 'Discover Affordable Books',
       description:
-          'Find affordable second-hand books from students and readers near you.',
-      color: Colors.indigo,
+          'Find second-hand books from students and readers near you - at a fraction of the original price.',
+      color: Color(0xFF3B5BDB),
     ),
     _OnboardingPage(
-      icon: Icons.sell,
-      title: 'Sell Your Books',
-      description: 'Give your old books a new home.',
-      color: Colors.deepOrange,
+      icon: Icons.storefront_rounded,
+      title: 'Sell Your Books Easily',
+      description:
+          'List your old books in minutes, set your price, and earn money while helping others read more.',
+      color: Color(0xFFE8590C),
     ),
     _OnboardingPage(
-      icon: Icons.handshake,
-      title: 'Trade & Connect',
+      icon: Icons.people_alt_rounded,
+      title: 'Trade & Build Community',
       description:
-          'Swap books with others in your community and grow your reading list for free.',
-      color: Colors.teal,
+          'Swap books with people around you, grow your reading list for free, and connect with fellow readers.',
+      color: Color(0xFF0CA678),
     ),
   ];
 
@@ -119,7 +120,9 @@ class _OnboardingViewState extends State<OnboardingView> {
                         const SizedBox(height: 32),
                         Text(
                           page.title,
+                          textAlign: TextAlign.center,
                           style: const TextStyle(
+                            fontFamily: 'Montserrat',
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
                           ),
@@ -129,7 +132,9 @@ class _OnboardingViewState extends State<OnboardingView> {
                           page.description,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
+                            fontFamily: 'Montserrat',
                             fontSize: 16,
+                            fontStyle: FontStyle.italic,
                             color: Colors.black54,
                           ),
                         ),
