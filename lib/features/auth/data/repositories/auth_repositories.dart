@@ -14,7 +14,8 @@ class AuthRepositoryImpl implements IAuthRepository {
   @override
   Future<Either<Failure, bool>> register(AuthEntity entity) async {
     try {
-      final result = await _dataSource.register(AuthHiveModel.fromEntity(entity));
+      final result =
+          await _dataSource.register(AuthHiveModel.fromEntity(entity));
       return Right(result);
     } catch (e) {
       return Left(LocalFailure(e.toString()));
@@ -22,7 +23,8 @@ class AuthRepositoryImpl implements IAuthRepository {
   }
 
   @override
-  Future<Either<Failure, AuthEntity>> login(String email, String password) async {
+  Future<Either<Failure, AuthEntity>> login(
+      String email, String password) async {
     try {
       final model = await _dataSource.login(email, password);
       return Right(model.toEntity());

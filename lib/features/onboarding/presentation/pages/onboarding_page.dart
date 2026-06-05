@@ -59,7 +59,7 @@ class _OnboardingViewState extends State<OnboardingView> {
   void _goToLogin() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const LoginView()),
+      MaterialPageRoute(builder: (_) => const LoginPage()),
     );
   }
 

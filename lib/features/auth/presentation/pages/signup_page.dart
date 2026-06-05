@@ -1,27 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kitabghar/features/auth/domain/entities/auth_entity.dart';
+import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.dart';
 
-class SignupView extends StatefulWidget {
-  const SignupView({super.key});
+class SignupPage extends ConsumerStatefulWidget {
+  const SignupPage({super.key});
 
   @override
-  State<SignupView> createState() => _SignupViewState();
+  ConsumerState<SignupPage> createState() => _SignupPageState();
 }
 
-class _SignupViewState extends State<SignupView> {
+class _SignupPageState extends ConsumerState<SignupPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
+  final _addressCtrl = TextEditingController();
 
   bool _obscure = true;
   bool _agree = false;
-  bool _showSuccess = false;
 
   @override
   void dispose() {
     _nameCtrl.dispose();
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
+    _phoneCtrl.dispose();
+    _addressCtrl.dispose();
     super.dispose();
   }
 
@@ -29,20 +35,25 @@ class _SignupViewState extends State<SignupView> {
     if (_formKey.currentState?.validate() ?? false) {
       if (!_agree) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please agree to the terms and privacy.')),
+          const SnackBar(
+              content: Text('Please agree to the terms and privacy.')),
         );
         return;
       }
-      setState(() {
-        _showSuccess = true;
-      });
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) setState(() => _showSuccess = false);
-      });
+      ref.read(authViewModelProvider.notifier).register(
+            AuthEntity(
+              name: _nameCtrl.text.trim(),
+              email: _emailCtrl.text.trim(),
+              password: _passwordCtrl.text.trim(),
+              phone: _phoneCtrl.text.trim(),
+              address: _addressCtrl.text.trim(),
+            ),
+          );
     }
   }
 
-  InputDecoration _fieldDecoration(String hint, IconData icon, {Widget? suffix}) =>
+  InputDecoration _fieldDecoration(String hint, IconData icon,
+          {Widget? suffix}) =>
       InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: Colors.black26, fontSize: 13),
@@ -51,7 +62,8 @@ class _SignupViewState extends State<SignupView> {
         filled: true,
         fillColor: Colors.white,
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         visualDensity: VisualDensity.compact,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -70,37 +82,25 @@ class _SignupViewState extends State<SignupView> {
         child: Icon(icon, color: Colors.white, size: 24),
       );
 
-  Widget _successBanner() => AnimatedOpacity(
-        opacity: _showSuccess ? 1 : 0,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-        child: AnimatedSlide(
-          offset: _showSuccess ? Offset.zero : const Offset(1, 0),
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-          child: Container(
-            width: double.infinity,
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-            decoration: BoxDecoration(
-              color: Colors.green,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Text(
-              'Registered successfully',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-      );
-
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authViewModelProvider);
+
+    ref.listen(authViewModelProvider, (previous, next) {
+      if (next.isSuccess && next.user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Account created successfully!')),
+        );
+        Navigator.pop(context);
+      }
+      if (next.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.error!)),
+        );
+        ref.read(authViewModelProvider.notifier).resetState();
+      }
+    });
+
     return Scaffold(
       backgroundColor: const Color(0xFF1D3A52),
       body: Column(
@@ -122,61 +122,95 @@ class _SignupViewState extends State<SignupView> {
               width: double.infinity,
               decoration: const BoxDecoration(
                 color: Color(0xFFF5F0E8),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                borderRadius:
+                    BorderRadius.vertical(top: Radius.circular(32)),
               ),
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24, vertical: 20),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _successBanner(),
                       const Center(
                         child: Column(
                           children: [
-                            Text(
-                              'Register',
-                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                            ),
+                            Text('Register',
+                                style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold)),
                             SizedBox(height: 2),
-                            Text(
-                              'Join the world of readers',
-                              style: TextStyle(fontSize: 13, color: Colors.black45),
-                            ),
+                            Text('Join the world of readers',
+                                style: TextStyle(
+                                    fontSize: 13, color: Colors.black45)),
                           ],
                         ),
                       ),
                       const SizedBox(height: 18),
-                      const Text(
-                        'Full Name',
-                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
-                      ),
+                      const Text('Full Name',
+                          style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600)),
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: _nameCtrl,
-                        decoration: _fieldDecoration('Example Bahadur', Icons.person_outline),
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Please enter full name' : null,
+                        decoration: _fieldDecoration(
+                            'Example Bahadur', Icons.person_outline),
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? 'Please enter full name'
+                            : null,
                       ),
                       const SizedBox(height: 12),
-                      const Text(
-                        'Email',
-                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
-                      ),
+                      const Text('Email',
+                          style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600)),
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: _emailCtrl,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: _fieldDecoration('example@gmail.com', Icons.mail_outline),
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Please enter email' : null,
+                        decoration: _fieldDecoration(
+                            'example@gmail.com', Icons.mail_outline),
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? 'Please enter email'
+                            : null,
                       ),
                       const SizedBox(height: 12),
-                      const Text(
-                        'Password',
-                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
+                      const Text('Phone Number',
+                          style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: _phoneCtrl,
+                        keyboardType: TextInputType.phone,
+                        decoration: _fieldDecoration(
+                            '98XXXXXXXX', Icons.phone_outlined),
+                        validator: (v) => (v == null || v.length < 7)
+                            ? 'Enter a valid phone number'
+                            : null,
                       ),
+                      const SizedBox(height: 12),
+                      const Text('Address',
+                          style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: _addressCtrl,
+                        decoration: _fieldDecoration(
+                            'Kathmandu, Nepal',
+                            Icons.location_on_outlined),
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? 'Please enter address'
+                            : null,
+                      ),
+                      const SizedBox(height: 12),
+                      const Text('Password',
+                          style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600)),
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: _passwordCtrl,
@@ -192,11 +226,13 @@ class _SignupViewState extends State<SignupView> {
                               color: Colors.black45,
                               size: 20,
                             ),
-                            onPressed: () => setState(() => _obscure = !_obscure),
+                            onPressed: () =>
+                                setState(() => _obscure = !_obscure),
                           ),
                         ),
-                        validator: (v) =>
-                            (v == null || v.length < 6) ? 'Password must be 6+ characters' : null,
+                        validator: (v) => (v == null || v.length < 6)
+                            ? 'Password must be 6+ characters'
+                            : null,
                       ),
                       const SizedBox(height: 4),
                       Row(
@@ -206,13 +242,15 @@ class _SignupViewState extends State<SignupView> {
                             child: Checkbox(
                               value: _agree,
                               shape: const CircleBorder(),
-                              onChanged: (v) => setState(() => _agree = v ?? false),
+                              onChanged: (v) =>
+                                  setState(() => _agree = v ?? false),
                             ),
                           ),
                           const Expanded(
                             child: Text(
                               'I agree to the Term & Condition and Privacy',
-                              style: TextStyle(fontSize: 11.5, color: Colors.black54),
+                              style: TextStyle(
+                                  fontSize: 11.5, color: Colors.black54),
                             ),
                           ),
                         ],
@@ -221,37 +259,45 @@ class _SignupViewState extends State<SignupView> {
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton(
-                          onPressed: _signup,
+                          onPressed: authState.isLoading ? null : _signup,
                           style: OutlinedButton.styleFrom(
                             backgroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 13),
                             side: const BorderSide(color: Colors.black26),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                                borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: const Text(
-                            'Sign up',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                            ),
-                          ),
+                          child: authState.isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2),
+                                )
+                              : const Text(
+                                  'Sign up',
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87),
+                                ),
                         ),
                       ),
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          const Expanded(child: Divider(color: Colors.black26)),
+                          const Expanded(
+                              child: Divider(color: Colors.black26)),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Text(
-                              'Or Sign up with',
-                              style: TextStyle(fontSize: 12.5, color: Colors.grey.shade500),
-                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10),
+                            child: Text('Or Sign up with',
+                                style: TextStyle(
+                                    fontSize: 12.5,
+                                    color: Colors.grey.shade500)),
                           ),
-                          const Expanded(child: Divider(color: Colors.black26)),
+                          const Expanded(
+                              child: Divider(color: Colors.black26)),
                         ],
                       ),
                       const SizedBox(height: 14),
@@ -262,27 +308,24 @@ class _SignupViewState extends State<SignupView> {
                           const SizedBox(width: 14),
                           _socialButton(Icons.apple, Colors.black),
                           const SizedBox(width: 14),
-                          _socialButton(Icons.facebook, const Color(0xFF1877F2)),
+                          _socialButton(
+                              Icons.facebook, const Color(0xFF1877F2)),
                         ],
                       ),
                       const SizedBox(height: 18),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text(
-                            'Already have an account? ',
-                            style: TextStyle(fontSize: 13.5, color: Colors.black54),
-                          ),
+                          const Text('Already have an account? ',
+                              style: TextStyle(
+                                  fontSize: 13.5, color: Colors.black54)),
                           GestureDetector(
                             onTap: () => Navigator.pop(context),
-                            child: const Text(
-                              'Sign in',
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
+                            child: const Text('Sign in',
+                                style: TextStyle(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87)),
                           ),
                         ],
                       ),

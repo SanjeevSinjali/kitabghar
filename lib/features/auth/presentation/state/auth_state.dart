@@ -1,15 +1,29 @@
-import 'package:dartz/dartz.dart';
-import 'package:kitabghar/core/error/failures.dart';
-import 'package:kitabghar/core/usecases/app_usecase.dart';
-import 'package:kitabghar/features/auth/domain/repositories/auth_reposity.dart';
+import 'package:kitabghar/features/auth/domain/entities/auth_entity.dart';
 
-class LogoutUseCase implements UseCase<Either<Failure, bool>, String> {
-  final IAuthRepository _repository;
+class AuthState {
+  final bool isLoading;
+  final bool isSuccess;
+  final AuthEntity? user;
+  final String? error;
 
-  LogoutUseCase({required IAuthRepository repository})
-      : _repository = repository;
+  const AuthState({
+    this.isLoading = false,
+    this.isSuccess = false,
+    this.user,
+    this.error,
+  });
 
-  @override
-  Future<Either<Failure, bool>> call(String email) =>
-      _repository.logout(email);
+  AuthState copyWith({
+    bool? isLoading,
+    bool? isSuccess,
+    AuthEntity? user,
+    String? error,
+  }) {
+    return AuthState(
+      isLoading: isLoading ?? this.isLoading,
+      isSuccess: isSuccess ?? this.isSuccess,
+      user: user ?? this.user,
+      error: error,
+    );
+  }
 }

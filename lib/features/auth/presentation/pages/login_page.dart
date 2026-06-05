@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kitabghar/features/auth/presentation/pages/signup_page.dart';
-import 'package:kitabghar/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.dart';
 
-class LoginView extends StatefulWidget {
-  const LoginView({super.key});
+class LoginPage extends ConsumerStatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<LoginView> createState() => _LoginViewState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginViewState extends State<LoginView> {
+class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
@@ -25,14 +26,11 @@ class _LoginViewState extends State<LoginView> {
 
   void _login() {
     if (_formKey.currentState?.validate() ?? false) {
-      Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (_) => const DashboardScreen()));
+      ref.read(authViewModelProvider.notifier).login(
+            _emailCtrl.text.trim(),
+            _passwordCtrl.text.trim(),
+          );
     }
-  }
-
-  void _goToSignup() {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (_) => const SignupView()));
   }
 
   InputDecoration _fieldDecoration(String hint, IconData icon) =>
@@ -50,6 +48,20 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authViewModelProvider);
+
+    ref.listen(authViewModelProvider, (previous, next) {
+      if (next.isSuccess && next.user != null) {
+        Navigator.pushReplacementNamed(context, '/dashboard');
+      }
+      if (next.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.error!)),
+        );
+        ref.read(authViewModelProvider.notifier).resetState();
+      }
+    });
+
     return Scaffold(
       backgroundColor: const Color(0xFF1D3A52),
       body: Column(
@@ -67,10 +79,12 @@ class _LoginViewState extends State<LoginView> {
               width: double.infinity,
               decoration: const BoxDecoration(
                 color: Color(0xFFF5F0E8),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                borderRadius:
+                    BorderRadius.vertical(top: Radius.circular(32)),
               ),
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 28, vertical: 32),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -82,41 +96,57 @@ class _LoginViewState extends State<LoginView> {
                           SizedBox(width: double.infinity),
                           Text('Welcome back',
                               textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                              style: TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.bold)),
                           SizedBox(height: 4),
                           Text('Start your reading adventure',
                               textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 14, color: Colors.black45)),
+                              style: TextStyle(
+                                  fontSize: 14, color: Colors.black45)),
                         ],
                       ),
                       const SizedBox(height: 28),
-
-                      const Text('Email', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                      const Text('Email',
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _emailCtrl,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: _fieldDecoration('example@gmail.com', Icons.mail_outline),
-                        validator: (v) => v!.trim().isEmpty ? 'Please enter email' : null,
+                        decoration: _fieldDecoration(
+                            'example@gmail.com', Icons.mail_outline),
+                        validator: (v) =>
+                            v!.trim().isEmpty ? 'Please enter email' : null,
                       ),
                       const SizedBox(height: 16),
-
-                      const Text('Password', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                      const Text('Password',
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _passwordCtrl,
                         obscureText: _obscure,
-                        decoration: _fieldDecoration('password', Icons.lock_outline).copyWith(
+                        decoration:
+                            _fieldDecoration('password', Icons.lock_outline)
+                                .copyWith(
                           suffixIcon: IconButton(
-                            icon: Icon(_obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                                color: Colors.black45),
-                            onPressed: () => setState(() => _obscure = !_obscure),
+                            icon: Icon(
+                              _obscure
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: Colors.black45,
+                            ),
+                            onPressed: () =>
+                                setState(() => _obscure = !_obscure),
                           ),
                         ),
-                        validator: (v) => v!.isEmpty ? 'Please enter password' : null,
+                        validator: (v) =>
+                            v!.isEmpty ? 'Please enter password' : null,
                       ),
                       const SizedBox(height: 8),
-
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -124,45 +154,65 @@ class _LoginViewState extends State<LoginView> {
                             Checkbox(
                               value: _rememberMe,
                               shape: const CircleBorder(),
-                              onChanged: (v) => setState(() => _rememberMe = v ?? false),
+                              onChanged: (v) =>
+                                  setState(() => _rememberMe = v ?? false),
                             ),
-                            const Text('Remember me', style: TextStyle(fontSize: 13, color: Colors.black54)),
+                            const Text('Remember me',
+                                style: TextStyle(
+                                    fontSize: 13, color: Colors.black54)),
                           ]),
                           TextButton(
                             onPressed: () {},
                             child: const Text('Forgot Password ?',
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87)),
+                                style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87)),
                           ),
                         ],
                       ),
                       const SizedBox(height: 12),
-
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton(
-                          onPressed: _login,
+                          onPressed: authState.isLoading ? null : _login,
                           style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.white, // white background
+                            backgroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             side: const BorderSide(color: Colors.black26),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: const Text('Login',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87)),
+                          child: authState.isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2),
+                                )
+                              : const Text('Login',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87)),
                         ),
                       ),
                       const SizedBox(height: 24),
-
                       Row(children: [
-                        const Expanded(child: Divider(color: Colors.black26)),
+                        const Expanded(
+                            child: Divider(color: Colors.black26)),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text('Or login with', style: TextStyle(fontSize: 13, color: Colors.grey.shade500)),
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text('Or login with',
+                              style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade500)),
                         ),
-                        const Expanded(child: Divider(color: Colors.black26)),
+                        const Expanded(
+                            child: Divider(color: Colors.black26)),
                       ]),
                       const SizedBox(height: 20),
-
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -170,20 +220,27 @@ class _LoginViewState extends State<LoginView> {
                           const SizedBox(width: 16),
                           _socialButton(Icons.apple, Colors.black),
                           const SizedBox(width: 16),
-                          _socialButton(Icons.facebook, const Color(0xFF1877F2)),
+                          _socialButton(
+                              Icons.facebook, const Color(0xFF1877F2)),
                         ],
                       ),
                       const SizedBox(height: 24),
-
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text("Don't have an account? ",
-                              style: TextStyle(fontSize: 14, color: Colors.black54)),
+                              style: TextStyle(
+                                  fontSize: 14, color: Colors.black54)),
                           GestureDetector(
-                            onTap: _goToSignup,
+                            onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const SignupPage())),
                             child: const Text('Sign up',
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87)),
                           ),
                         ],
                       ),
@@ -208,7 +265,10 @@ class _LoginViewState extends State<LoginView> {
         ),
         child: const Center(
           child: Text('G',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFEA4335))),
+              style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFEA4335))),
         ),
       );
 

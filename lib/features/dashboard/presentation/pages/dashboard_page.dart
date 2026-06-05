@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:kitabghar/features/auth/presentation/pages/login_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.dart';
 import 'package:kitabghar/features/dashboard/presentation/pages/explore_page.dart';
 import 'package:kitabghar/features/dashboard/presentation/pages/homescreen_page.dart';
 import 'package:kitabghar/features/dashboard/presentation/pages/profile_page.dart';
 import 'package:kitabghar/features/dashboard/presentation/pages/sell_page.dart';
 import 'package:kitabghar/features/dashboard/presentation/pages/wish_list_page.dart';
 
-class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+class DashboardPage extends ConsumerStatefulWidget {
+  const DashboardPage({super.key});
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  ConsumerState<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardPageState extends ConsumerState<DashboardPage> {
   int _currentIndex = 0;
 
   final List<Widget> _tabs = const [
@@ -25,11 +26,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   ];
 
   void _logout() {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginView()),
-      (_) => false,
-    );
+    final user = ref.read(authViewModelProvider).user;
+    if (user != null) {
+      ref.read(authViewModelProvider.notifier).logout(user.email);
+    }
+    Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
   }
 
   @override
@@ -38,11 +39,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       appBar: AppBar(
         title: const Text('KitabGhar'),
         actions: [
-          // IconButton(
-          //   icon: const Icon(Icons.brightness_6_outlined),
-          //   tooltip: 'Toggle Theme',
-          //   onPressed: () => AppThemeNotifier.of(context).toggleTheme(),
-          // ),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
