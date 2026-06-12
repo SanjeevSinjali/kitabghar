@@ -16,7 +16,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
-  final _addressCtrl = TextEditingController();
 
   bool _obscure = true;
   bool _agree = false;
@@ -27,7 +26,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
     _phoneCtrl.dispose();
-    _addressCtrl.dispose();
     super.dispose();
   }
 
@@ -45,8 +43,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
               name: _nameCtrl.text.trim(),
               email: _emailCtrl.text.trim(),
               password: _passwordCtrl.text.trim(),
-              phone: _phoneCtrl.text.trim(),
-              address: _addressCtrl.text.trim(),
+              phoneNumber: _phoneCtrl.text.trim(),
             ),
           );
     }
@@ -192,21 +189,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                             : null,
                       ),
                       const SizedBox(height: 12),
-                      const Text('Address',
-                          style: TextStyle(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 6),
-                      TextFormField(
-                        controller: _addressCtrl,
-                        decoration: _fieldDecoration(
-                            'Kathmandu, Nepal',
-                            Icons.location_on_outlined),
-                        validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Please enter address'
-                            : null,
-                      ),
-                      const SizedBox(height: 12),
                       const Text('Password',
                           style: TextStyle(
                               fontSize: 12.5,
@@ -262,7 +244,8 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                           onPressed: authState.isLoading ? null : _signup,
                           style: OutlinedButton.styleFrom(
                             backgroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 13),
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 13),
                             side: const BorderSide(color: Colors.black26),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12)),

@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kitabghar/core/api/api_client.dart';
 import 'package:kitabghar/core/services/hive/hive_service.dart';
 import 'package:kitabghar/features/auth/data/datasources/local/auth_local_datasource.dart';
+import 'package:kitabghar/features/auth/data/datasources/remote/auth_remote_datasource.dart';
 import 'package:kitabghar/features/auth/data/repositories/auth_repositories.dart';
 import 'package:kitabghar/features/auth/domain/entities/auth_entity.dart';
 import 'package:kitabghar/features/auth/domain/usecases/login_usercase.dart';
@@ -8,14 +10,23 @@ import 'package:kitabghar/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:kitabghar/features/auth/domain/usecases/register_usecase.dart';
 import 'package:kitabghar/features/auth/presentation/state/auth_state.dart';
 
+// Providers
 final hiveServiceProvider = Provider<HiveService>((ref) => HiveService());
+final apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
 
 final authLocalDataSourceProvider = Provider<AuthLocalDataSource>((ref) {
   return AuthLocalDataSource(hiveService: ref.read(hiveServiceProvider));
 });
 
+final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
+  return AuthRemoteDataSource(apiClient: ref.read(apiClientProvider));
+});
+
 final authRepositoryProvider = Provider<AuthRepositoryImpl>((ref) {
-  return AuthRepositoryImpl(dataSource: ref.read(authLocalDataSourceProvider));
+  return AuthRepositoryImpl(
+    localDataSource: ref.read(authLocalDataSourceProvider),
+    remoteDataSource: ref.read(authRemoteDataSourceProvider),
+  );
 });
 
 final registerUseCaseProvider = Provider<RegisterUseCase>((ref) {
