@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Kitabghar needs camera access to take photos</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Kitabghar needs photo library access to upload images</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Kitabghar needs permission to save photos</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
