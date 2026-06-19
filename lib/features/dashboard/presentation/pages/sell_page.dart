@@ -2,8 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart'
-    show Permission, openAppSettings, PermissionActions, PermissionStatusGetters;
 import 'package:kitabghar/core/utils/snackbar_utils.dart';
 import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.dart';
 import 'package:kitabghar/features/books/presentation/view_model/books_view_model.dart';
@@ -50,62 +48,19 @@ class _SellPageState extends ConsumerState<SellPage> {
   // ── Image picking ─────────────────────────────────────────
 
   Future<void> _pickFromGallery() async {
-    final status = await Permission.photos.request();
-    if (status.isGranted || status.isLimited) {
-      final xfile = await _picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 85,
-      );
-      if (xfile != null) setState(() => _pickedImage = File(xfile.path));
-    } else if (status.isPermanentlyDenied) {
-      _showSettingsDialog('Photo library');
-    }
+    final xfile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
+    if (xfile != null) setState(() => _pickedImage = File(xfile.path));
   }
 
   Future<void> _pickFromCamera() async {
-    final status = await Permission.camera.request();
-    if (status.isGranted) {
-      final xfile = await _picker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 85,
-      );
-      if (xfile != null) setState(() => _pickedImage = File(xfile.path));
-    } else if (status.isPermanentlyDenied) {
-      _showSettingsDialog('Camera');
-    }
-  }
-
-  void _showSettingsDialog(String permission) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(
-          '$permission access needed',
-          style: const TextStyle(
-            fontFamily: _montserrat,
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        content: Text(
-          'Please enable $permission access in Settings to continue.',
-          style: const TextStyle(fontFamily: _montserrat, fontSize: 13),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              openAppSettings();
-            },
-            child: const Text('Open Settings'),
-          ),
-        ],
-      ),
+    final xfile = await _picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 85,
     );
+    if (xfile != null) setState(() => _pickedImage = File(xfile.path));
   }
 
   void _showImageSourceSheet() {
