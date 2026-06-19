@@ -11,8 +11,7 @@ class AuthLocalDataSource implements IAuthDataSource {
   @override
   Future<bool> register(AuthHiveModel user) async {
     try {
-      final existing = _hiveService.getUser(user.email);
-      if (existing != null) throw Exception('Email already registered');
+      // save or update — don't throw if already exists
       await _hiveService.registerUser(user);
       return true;
     } catch (e) {

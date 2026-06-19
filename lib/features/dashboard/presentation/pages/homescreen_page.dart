@@ -1,21 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:kitabghar/features/dashboard/presentation/pages/sell_page.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   static const _montserrat = 'Montserrat';
 
+  static const _categories = [
+    _Category('All', Icons.apps_rounded),
+    _Category('Programming', Icons.code_rounded),
+    _Category('Algorithms', Icons.account_tree_rounded),
+    _Category('Networking', Icons.lan_rounded),
+    _Category('Design', Icons.palette_rounded),
+    _Category('AI / ML', Icons.psychology_rounded),
+  ];
+
+  int _selectedCategory = 0;
+
   static const _books = [
-    _Book('Clean Code','Robert C.Martin','Rs. 250', '4.8', 'assets/images/book_1.jpg'),
-    _Book('Introduction to Algorithm','Thomas H.Cormen','Rs. 150', '4.7', 'assets/images/book_2.jpg'),
-    _Book('Computer Networking','James F.Kurose','Rs. 300', '4.9', 'assets/images/book_3.jpg'),
-    _Book('Design Pattern','Eric Gamma','Rs. 220', '4.6', 'assets/images/book_4.jpg'),
-    _Book('The Pragmatic Programmer','Andrew Hunt & David Thomas','Rs. 120', '4.8', 'assets/images/book_5.jpg'),
-    _Book('Database System Concept','S.Sudarshan & Henry K.Korth','Rs. 180', '4.5', 'assets/images/book_6.jpg'),
-    _Book('Operating System Concepts','James Peterson & Abraham Silberschatz','Rs. 200', '4.7', 'assets/images/book_7.jpg'),
-    _Book('Artificial Intelligence', 'Stuart Russell & Peter Norvig','Rs. 160', '4.6', 'assets/images/book_8.jpg'),
-    _Book('You Don’t Know JS Yet','Kyle Simpson','Rs. 270', '4.5', 'assets/images/book_9.jpg'),
-    _Book('Code Complete','Steve McConnell','Rs. 190', '4.7', 'assets/images/book_10.jpg'),
+    _Book('Clean Code', 'Robert C.Martin', 'Rs. 250', '4.8', 'assets/images/book_1.jpg'),
+    _Book('Introduction to Algorithm', 'Thomas H.Cormen', 'Rs. 150', '4.7', 'assets/images/book_2.jpg'),
+    _Book('Computer Networking', 'James F.Kurose', 'Rs. 300', '4.9', 'assets/images/book_3.jpg'),
+    _Book('Design Pattern', 'Eric Gamma', 'Rs. 220', '4.6', 'assets/images/book_4.jpg'),
+    _Book('The Pragmatic Programmer', 'Andrew Hunt & David Thomas', 'Rs. 120', '4.8', 'assets/images/book_5.jpg'),
+    _Book('Database System Concept', 'S.Sudarshan & Henry K.Korth', 'Rs. 180', '4.5', 'assets/images/book_6.jpg'),
+    _Book('Operating System Concepts', 'James Peterson & Abraham Silberschatz', 'Rs. 200', '4.7', 'assets/images/book_7.jpg'),
+    _Book('Artificial Intelligence', 'Stuart Russell & Peter Norvig', 'Rs. 160', '4.6', 'assets/images/book_8.jpg'),
+    _Book('You Don\'t Know JS Yet', 'Kyle Simpson', 'Rs. 270', '4.5', 'assets/images/book_9.jpg'),
+    _Book('Code Complete', 'Steve McConnell', 'Rs. 190', '4.7', 'assets/images/book_10.jpg'),
   ];
 
   static const _cardColors = [
@@ -35,6 +52,33 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F0E8),
+
+      // ── Round + FAB ──────────────────────────────────────
+      floatingActionButton: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const SellPage()),
+          );
+        },
+        child: Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            color: const Color(0xFF1D3A52),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF1D3A52).withValues(alpha: 0.35),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
+        ),
+      ),
+
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -63,29 +107,6 @@ class HomeScreen extends StatelessWidget {
                                 color: Color(0xFF1D3A52))),
                       ],
                     ),
-                    // Stack(
-                    //   children: [
-                    //     const CircleAvatar(
-                    //       radius: 21,
-                    //       backgroundColor: Color(0xFF1D3A52),
-                    //       child: Icon(Icons.person, color: Colors.white, size: 22),
-                    //     ),
-                    //     Positioned(
-                    //       right: 0,
-                    //       top: 0,
-                    //       child: Container(
-                    //         width: 11,
-                    //         height: 11,
-                    //         decoration: BoxDecoration(
-                    //           color: Colors.redAccent,
-                    //           shape: BoxShape.circle,
-                    //           border: Border.all(
-                    //               color: const Color(0xFFF5F0E8), width: 1.5),
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
                   ],
                 ),
               ),
@@ -107,8 +128,7 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                   child: TextField(
-                    style: const TextStyle(
-                        fontFamily: _montserrat, fontSize: 13),
+                    style: const TextStyle(fontFamily: _montserrat, fontSize: 13),
                     decoration: InputDecoration(
                       hintText: 'Search books, authors…',
                       hintStyle: const TextStyle(
@@ -136,7 +156,79 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            // ── Trending section header ───────────────────────
+            // ── Category chips ───────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 18, 0, 0),
+                child: SizedBox(
+                  height: 40,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    itemCount: _categories.length,
+                    itemBuilder: (_, i) {
+                      final selected = _selectedCategory == i;
+                      return GestureDetector(
+                        onTap: () => setState(() => _selectedCategory = i),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          margin: const EdgeInsets.only(right: 10),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: selected
+                                ? const Color(0xFF1D3A52)
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: selected
+                                  ? const Color(0xFF1D3A52)
+                                  : const Color(0xFFE0D8CC),
+                              width: 1.5,
+                            ),
+                            boxShadow: selected
+                                ? [
+                                    BoxShadow(
+                                        color: const Color(0xFF1D3A52)
+                                            .withValues(alpha: 0.25),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 3)),
+                                  ]
+                                : [],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                _categories[i].icon,
+                                size: 14,
+                                color: selected
+                                    ? Colors.white
+                                    : const Color(0xFF1D3A52),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                _categories[i].name,
+                                style: TextStyle(
+                                  fontFamily: _montserrat,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: selected
+                                      ? Colors.white
+                                      : const Color(0xFF1D3A52),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+
+            // Trending section header 
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 26, 20, 12),
@@ -179,7 +271,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            // ── Trending horizontal list ──────────────────────
+            // Trending horizontal list 
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 210,
@@ -195,7 +287,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            // ── All Listings header ───────────────────────────
+            // All Listings header 
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 26, 20, 12),
@@ -221,9 +313,10 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            // ── All Listings grid ─────────────────────────────
+            // All Listings grid 
+            // ↓ padding bottom changed to 100 so FAB doesn't cover last card
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
               sliver: SliverGrid(
                 delegate: SliverChildBuilderDelegate(
                   (_, i) => _GridBookCard(
@@ -248,10 +341,16 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-// ── Data model ────────────────────────────────────────────────
+// ── Data models ───────────────────────────────────────────────
 class _Book {
   final String title, author, price, rating, image;
   const _Book(this.title, this.author, this.price, this.rating, this.image);
+}
+
+class _Category {
+  final String name;
+  final IconData icon;
+  const _Category(this.name, this.icon);
 }
 
 // ── Trending card ─────────────────────────────────────────────

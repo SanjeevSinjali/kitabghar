@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kitabghar/core/utils/snackbar_utils.dart';
 import 'package:kitabghar/features/auth/domain/entities/auth_entity.dart';
 import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.dart';
 
@@ -32,10 +33,8 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   void _signup() {
     if (_formKey.currentState?.validate() ?? false) {
       if (!_agree) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Please agree to the terms and privacy.')),
-        );
+        SnackbarUtils.showError(
+            context, 'Please agree to the terms and privacy.');
         return;
       }
       ref.read(authViewModelProvider.notifier).register(
@@ -85,15 +84,11 @@ class _SignupPageState extends ConsumerState<SignupPage> {
 
     ref.listen(authViewModelProvider, (previous, next) {
       if (next.isSuccess && next.user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Account created successfully!')),
-        );
+        SnackbarUtils.showSuccess(context, 'Account created successfully!');
         Navigator.pop(context);
       }
       if (next.error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.error!)),
-        );
+        SnackbarUtils.showError(context, next.error!);
         ref.read(authViewModelProvider.notifier).resetState();
       }
     });
@@ -140,7 +135,8 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                             SizedBox(height: 2),
                             Text('Join the world of readers',
                                 style: TextStyle(
-                                    fontSize: 13, color: Colors.black45)),
+                                    fontSize: 13,
+                                    color: Colors.black45)),
                           ],
                         ),
                       ),
@@ -154,9 +150,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                         controller: _nameCtrl,
                         decoration: _fieldDecoration(
                             'Example Bahadur', Icons.person_outline),
-                        validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Please enter full name'
-                            : null,
+                        validator: (v) =>
+                            (v == null || v.trim().isEmpty)
+                                ? 'Please enter full name'
+                                : null,
                       ),
                       const SizedBox(height: 12),
                       const Text('Email',
@@ -169,9 +166,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                         keyboardType: TextInputType.emailAddress,
                         decoration: _fieldDecoration(
                             'example@gmail.com', Icons.mail_outline),
-                        validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Please enter email'
-                            : null,
+                        validator: (v) =>
+                            (v == null || v.trim().isEmpty)
+                                ? 'Please enter email'
+                                : null,
                       ),
                       const SizedBox(height: 12),
                       const Text('Phone Number',
@@ -184,9 +182,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                         keyboardType: TextInputType.phone,
                         decoration: _fieldDecoration(
                             '98XXXXXXXX', Icons.phone_outlined),
-                        validator: (v) => (v == null || v.length < 7)
-                            ? 'Enter a valid phone number'
-                            : null,
+                        validator: (v) =>
+                            (v == null || v.length < 7)
+                                ? 'Enter a valid phone number'
+                                : null,
                       ),
                       const SizedBox(height: 12),
                       const Text('Password',
@@ -212,9 +211,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                                 setState(() => _obscure = !_obscure),
                           ),
                         ),
-                        validator: (v) => (v == null || v.length < 6)
-                            ? 'Password must be 6+ characters'
-                            : null,
+                        validator: (v) =>
+                            (v == null || v.length < 6)
+                                ? 'Password must be 6+ characters'
+                                : null,
                       ),
                       const SizedBox(height: 4),
                       Row(
@@ -232,7 +232,8 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                             child: Text(
                               'I agree to the Term & Condition and Privacy',
                               style: TextStyle(
-                                  fontSize: 11.5, color: Colors.black54),
+                                  fontSize: 11.5,
+                                  color: Colors.black54),
                             ),
                           ),
                         ],
@@ -241,14 +242,17 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton(
-                          onPressed: authState.isLoading ? null : _signup,
+                          onPressed:
+                              authState.isLoading ? null : _signup,
                           style: OutlinedButton.styleFrom(
                             backgroundColor: Colors.white,
-                            padding:
-                                const EdgeInsets.symmetric(vertical: 13),
-                            side: const BorderSide(color: Colors.black26),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 13),
+                            side:
+                                const BorderSide(color: Colors.black26),
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
+                                borderRadius:
+                                    BorderRadius.circular(12)),
                           ),
                           child: authState.isLoading
                               ? const SizedBox(
@@ -287,12 +291,13 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _socialButton(Icons.g_mobiledata, Colors.red),
+                          _socialButton(
+                              Icons.g_mobiledata, Colors.red),
                           const SizedBox(width: 14),
                           _socialButton(Icons.apple, Colors.black),
                           const SizedBox(width: 14),
-                          _socialButton(
-                              Icons.facebook, const Color(0xFF1877F2)),
+                          _socialButton(Icons.facebook,
+                              const Color(0xFF1877F2)),
                         ],
                       ),
                       const SizedBox(height: 18),
@@ -301,7 +306,8 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                         children: [
                           const Text('Already have an account? ',
                               style: TextStyle(
-                                  fontSize: 13.5, color: Colors.black54)),
+                                  fontSize: 13.5,
+                                  color: Colors.black54)),
                           GestureDetector(
                             onTap: () => Navigator.pop(context),
                             child: const Text('Sign in',

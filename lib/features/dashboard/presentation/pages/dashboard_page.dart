@@ -4,7 +4,7 @@ import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.
 import 'package:kitabghar/features/dashboard/presentation/pages/explore_page.dart';
 import 'package:kitabghar/features/dashboard/presentation/pages/homescreen_page.dart';
 import 'package:kitabghar/features/dashboard/presentation/pages/profile_page.dart';
-import 'package:kitabghar/features/dashboard/presentation/pages/sell_page.dart';
+import 'package:kitabghar/features/dashboard/presentation/pages/add_to_cart.dart';
 import 'package:kitabghar/features/dashboard/presentation/pages/wish_list_page.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
@@ -20,7 +20,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   final List<Widget> _tabs = const [
     HomeScreen(),
     ExploreScreen(),
-    SellScreen(),
+    AddToCartScreen(),
     WishListScreen(),
     ProfileScreen(),
   ];
@@ -85,7 +85,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite_outline),
             activeIcon: Icon(Icons.favorite),
-            label: 'Wishlist',
+            label: 'Favourite',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),

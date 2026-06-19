@@ -19,9 +19,7 @@ class AuthRepositoryImpl implements IAuthRepository {
   @override
   Future<Either<Failure, bool>> register(AuthEntity entity) async {
     try {
-      // 1. Register on API first
       await _remoteDataSource.register(AuthHiveModel.fromEntity(entity));
-      // 2. Save locally in Hive
       await _localDataSource.register(AuthHiveModel.fromEntity(entity));
       return const Right(true);
     } catch (e) {
@@ -33,13 +31,31 @@ class AuthRepositoryImpl implements IAuthRepository {
   Future<Either<Failure, AuthEntity>> login(
       String email, String password) async {
     try {
-      // 1. Login via API
+      // 1. Login via API — gets token back
       final model = await _remoteDataSource.login(email, password);
-      // 2. Save user locally in Hive
-      await _localDataSource.register(model);
-      return Right(model.toEntity());
+
+      // 2. Save to Hive with token
+      await _localDataSource.register(
+        AuthHiveModel(
+          name: model.name,
+          email: model.email,
+          password: password,
+          phoneNumber: model.phoneNumber,
+          token: model.token, // ← token saved here
+        ),
+      );
+
+      // 3. Return entity with token
+      return Right(
+        AuthEntity(
+          name: model.name,
+          email: model.email,
+          password: password,
+          phoneNumber: model.phoneNumber,
+          token: model.token, // ← token in entity
+        ),
+      );
     } catch (e) {
-      // 3. If API fails, try local (offline mode)
       try {
         final localModel = await _localDataSource.login(email, password);
         return Right(localModel.toEntity());

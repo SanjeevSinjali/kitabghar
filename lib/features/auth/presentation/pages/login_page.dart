@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kitabghar/core/utils/snackbar_utils.dart';
 import 'package:kitabghar/features/auth/presentation/pages/signup_page.dart';
 import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.dart';
 
@@ -52,12 +53,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     ref.listen(authViewModelProvider, (previous, next) {
       if (next.isSuccess && next.user != null) {
+        SnackbarUtils.showSuccess(context, 'Logged in successfully!');
         Navigator.pushReplacementNamed(context, '/dashboard');
       }
       if (next.error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.error!)),
-        );
+        SnackbarUtils.showError(context, next.error!);
         ref.read(authViewModelProvider.notifier).resetState();
       }
     });
@@ -178,7 +178,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           onPressed: authState.isLoading ? null : _login,
                           style: OutlinedButton.styleFrom(
                             backgroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 16),
                             side: const BorderSide(color: Colors.black26),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12)),

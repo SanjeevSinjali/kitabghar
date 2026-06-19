@@ -1,5 +1,6 @@
 import 'package:hive/hive.dart';
 import 'package:kitabghar/features/auth/domain/entities/auth_entity.dart';
+
 part 'auth_hive_model.g.dart';
 
 @HiveType(typeId: 0)
@@ -32,6 +33,7 @@ class AuthHiveModel extends HiveObject {
         email: entity.email,
         password: entity.password,
         phoneNumber: entity.phoneNumber,
+        token: entity.token,
       );
 
   AuthEntity toEntity() => AuthEntity(
@@ -39,5 +41,6 @@ class AuthHiveModel extends HiveObject {
         email: email,
         password: password,
         phoneNumber: phoneNumber,
+        token: token,
       );
 }

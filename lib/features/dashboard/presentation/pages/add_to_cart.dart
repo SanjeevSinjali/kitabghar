@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 
-class WishListScreen extends StatelessWidget {
-  const WishListScreen({super.key});
+class AddToCartScreen extends StatelessWidget {
+  const AddToCartScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Text('I am Favourite Screen',
+      child: Text('I am Add-to-Cart Screen',
       style: TextStyle(
         fontFamily: 'Montserrat',
         fontSize: 18,
-      ),
-      ),
+      ),),
     );
   }
 }
