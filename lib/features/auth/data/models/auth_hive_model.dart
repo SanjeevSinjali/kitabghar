@@ -7,16 +7,12 @@ part 'auth_hive_model.g.dart';
 class AuthHiveModel extends HiveObject {
   @HiveField(0)
   final String name;
-
   @HiveField(1)
   final String email;
-
   @HiveField(2)
   final String password;
-
   @HiveField(3)
   final String phoneNumber;
-
   @HiveField(4)
   final String? token;
 

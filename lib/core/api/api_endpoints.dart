@@ -4,7 +4,7 @@ class ApiEndpoints {
   // static const String baseUrl = "http://10.0.2.2:5000/api";
   // static const String baseUrl = "http://172.20.10.2:5000/api";
   // 10.0.2.2 = localhost for Android emulator
-  static const String baseUrl = "http://192.168.1.77:5000/api";
+  static const String baseUrl = "http://192.168.18.125:5000/api";
 
   // Auth
   static const String register = "$baseUrl/auth/register";
