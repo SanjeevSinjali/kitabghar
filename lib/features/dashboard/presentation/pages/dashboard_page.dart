@@ -5,7 +5,7 @@ import 'package:kitabghar/core/providers/notification_provider.dart';
 import 'package:kitabghar/features/dashboard/presentation/pages/explore_page.dart';
 import 'package:kitabghar/features/dashboard/presentation/pages/homescreen_page.dart';
 import 'package:kitabghar/features/dashboard/presentation/pages/profile_page.dart';
-import 'package:kitabghar/features/dashboard/presentation/pages/add_to_cart.dart';
+import 'package:kitabghar/features/dashboard/presentation/pages/purchases_page.dart';
 import 'package:kitabghar/features/dashboard/presentation/pages/wish_list_page.dart';
 import 'package:kitabghar/features/notifications/presentation/pages/notifications_page.dart';
 
@@ -22,7 +22,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   final List<Widget> _tabs = const [
     HomeScreen(),
     ExploreScreen(),
-    AddToCartScreen(),
+    PurchasesScreen(),
     WishListScreen(),
     ProfileScreen(),
   ];
@@ -119,9 +119,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             label: 'Explore',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart_outlined),
-            activeIcon: Icon(Icons.shopping_cart),
-            label: 'Cart',
+            icon: Icon(Icons.receipt_long_outlined),
+            activeIcon: Icon(Icons.receipt_long),
+            label: 'Purchases',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite_outline),
