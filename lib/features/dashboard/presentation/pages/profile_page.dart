@@ -2,8 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kitabghar/core/extensions/context_extensions.dart';
+import 'package:kitabghar/core/providers/avatar_provider.dart';
+import 'package:kitabghar/core/providers/notification_provider.dart';
+import 'package:kitabghar/core/providers/theme_provider.dart';
 import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.dart';
 import 'package:kitabghar/features/books/presentation/view_model/books_view_model.dart';
+import 'package:kitabghar/features/notifications/presentation/pages/notifications_page.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -13,14 +18,12 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfileScreen> {
-  static const _montserrat = 'Montserrat';
-  File? _avatarImage;
   final _picker = ImagePicker();
 
-  Future<void> _pickAvatar() async {
+  Future<void> _pickAvatar(String email) async {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: context.cardColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -33,38 +36,49 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.black12,
+                color: ctx.textTertiary,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 16),
             ListTile(
-              leading: const Icon(Icons.photo_library_rounded,
-                  color: Colors.black87),
+              leading: Icon(Icons.photo_library_rounded, color: ctx.textPrimary),
               title: Text('Photo Library',
-                  style: TextStyle(
-                      fontFamily: _montserrat, color: Colors.black87)),
+                  style: TextStyle(color: ctx.textPrimary)),
               onTap: () async {
                 Navigator.pop(ctx);
                 final picked = await _picker.pickImage(
                     source: ImageSource.gallery, imageQuality: 80);
                 if (picked != null) {
-                  setState(() => _avatarImage = File(picked.path));
+                  await ref
+                      .read(avatarProvider.notifier)
+                      .setAvatar(email, File(picked.path));
+                  await ref.read(notificationsProvider.notifier).addNotification(
+                        email,
+                        title: 'Profile Updated',
+                        message: 'Your profile picture has been updated.',
+                        type: 'profile_updated',
+                      );
                 }
               },
             ),
             ListTile(
-              leading:
-                  const Icon(Icons.camera_alt_rounded, color: Colors.black87),
-              title: Text('Camera',
-                  style: TextStyle(
-                      fontFamily: _montserrat, color: Colors.black87)),
+              leading: Icon(Icons.camera_alt_rounded, color: ctx.textPrimary),
+              title: Text('Camera', style: TextStyle(color: ctx.textPrimary)),
               onTap: () async {
                 Navigator.pop(ctx);
                 final picked = await _picker.pickImage(
                     source: ImageSource.camera, imageQuality: 80);
                 if (picked != null) {
-                  setState(() => _avatarImage = File(picked.path));
+                  await ref
+                      .read(avatarProvider.notifier)
+                      .setAvatar(email, File(picked.path));
+                  await ref.read(notificationsProvider.notifier).addNotification(
+                        email,
+                        title: 'Profile Updated',
+                        message: 'Your profile picture has been updated.',
+                        type: 'profile_updated',
+                      );
                 }
               },
             ),
@@ -80,27 +94,18 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
     final authState = ref.watch(authViewModelProvider);
     final booksState = ref.watch(booksViewModelProvider);
     final user = authState.user;
+    final isDarkMode = ref.watch(themeModeProvider.notifier).isDarkMode;
+    final avatarFile = ref.watch(avatarProvider);
 
     final myListings = booksState.books
         .where((b) => b.sellerId != null && b.sellerId == user?.id)
         .toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: context.backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
         automaticallyImplyLeading: false,
-        centerTitle: false,
-        title: Text(
-          'Profile',
-          style: TextStyle(
-            color: Colors.black,
-            fontFamily: _montserrat,
-            fontWeight: FontWeight.w700,
-            fontSize: 20,
-          ),
-        ),
+        title: const Text('Profile'),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -113,26 +118,31 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
               children: [
                 CircleAvatar(
                   radius: 48,
-                  backgroundColor: const Color(0xFFE0E0E0),
-                  backgroundImage: _avatarImage != null
-                      ? FileImage(_avatarImage!)
-                      : null,
-                  child: _avatarImage == null
-                      ? const Icon(Icons.person_rounded,
-                          size: 52, color: Colors.white)
+                  backgroundColor: context.colors.primary.withValues(alpha: 0.15),
+                  backgroundImage:
+                      avatarFile != null ? FileImage(avatarFile) : null,
+                  child: avatarFile == null
+                      ? Icon(Icons.person_rounded,
+                          size: 52, color: context.colors.primary)
                       : null,
                 ),
                 Positioned(
                   bottom: 0,
                   right: 0,
                   child: GestureDetector(
-                    onTap: _pickAvatar,
+                    onTap: user?.email != null
+                        ? () => _pickAvatar(user!.email)
+                        : null,
                     child: Container(
                       width: 30,
                       height: 30,
-                      decoration: const BoxDecoration(
-                        color: Colors.black87,
+                      decoration: BoxDecoration(
+                        color: context.colors.primary,
                         shape: BoxShape.circle,
+                        border: Border.all(
+                          color: context.backgroundColor,
+                          width: 2,
+                        ),
                       ),
                       child: const Icon(Icons.camera_alt_rounded,
                           size: 16, color: Colors.white),
@@ -149,47 +159,34 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
           Center(
             child: Text(
               user?.name ?? 'User Name',
-              style: TextStyle(
-                color: Colors.black,
-                fontFamily: _montserrat,
-                fontWeight: FontWeight.w700,
-                fontSize: 18,
-              ),
+              style: context.textStyles.titleLarge?.copyWith(fontSize: 18),
             ),
           ),
           const SizedBox(height: 4),
           Center(
             child: Text(
               user?.email ?? 'username@mail.com',
-              style: TextStyle(
-                color: Colors.black54,
-                fontFamily: _montserrat,
-                fontSize: 13,
-              ),
+              style: TextStyle(color: context.textSecondary, fontSize: 13),
             ),
           ),
 
           const SizedBox(height: 32),
 
           // ── My Listings ──────────────────────────────────
-          _SectionLabel(label: 'My Listings', montserrat: _montserrat),
+          _SectionLabel(label: 'My Listings'),
           const SizedBox(height: 12),
 
           if (myListings.isEmpty)
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.cardColor,
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Center(
                 child: Text(
                   'No listings yet. Sell your first book!',
-                  style: TextStyle(
-                    color: Colors.black38,
-                    fontFamily: _montserrat,
-                    fontSize: 13,
-                  ),
+                  style: TextStyle(color: context.textTertiary, fontSize: 13),
                 ),
               ),
             )
@@ -199,11 +196,10 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: myListings.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 12),
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
                 itemBuilder: (context, index) {
                   final book = myListings[index];
-                  return _ListingCard(
-                      book: book, montserrat: _montserrat);
+                  return _ListingCard(book: book);
                 },
               ),
             ),
@@ -211,7 +207,7 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: 28),
 
           // ── Account ──────────────────────────────────────
-          _SectionLabel(label: 'Account', montserrat: _montserrat),
+          _SectionLabel(label: 'Account'),
           const SizedBox(height: 10),
           _SettingsGroup(items: [
             _SettingItem(
@@ -230,34 +226,41 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: 20),
 
           // ── Preferences ──────────────────────────────────
-          _SectionLabel(label: 'Preferences', montserrat: _montserrat),
+          _SectionLabel(label: 'Preferences'),
           const SizedBox(height: 10),
           _SettingsGroup(items: [
             _SettingItem(
               icon: Icons.notifications_none_rounded,
               label: 'Notifications',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const NotificationsPage()),
+                );
+              },
             ),
             _SettingItem(
-              icon: Icons.dark_mode_outlined,
+              icon: isDarkMode
+                  ? Icons.dark_mode_rounded
+                  : Icons.dark_mode_outlined,
               label: 'Dark Mode',
               trailing: Switch(
-                value: false,
-                onChanged: (_) {},
-                activeThumbColor: Colors.black87,
+                value: isDarkMode,
+                onChanged: (value) {
+                  ref.read(themeModeProvider.notifier).setDarkMode(value);
+                },
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              onTap: () {},
+              onTap: () {
+                ref.read(themeModeProvider.notifier).toggle();
+              },
             ),
             _SettingItem(
               icon: Icons.translate_rounded,
               label: 'Language',
               trailing: Text(
                 'English',
-                style: TextStyle(
-                    color: Colors.black38,
-                    fontFamily: _montserrat,
-                    fontSize: 13),
+                style: TextStyle(color: context.textTertiary, fontSize: 13),
               ),
               onTap: () {},
               isLast: true,
@@ -267,7 +270,7 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: 20),
 
           // ── Support ──────────────────────────────────────
-          _SectionLabel(label: 'Support', montserrat: _montserrat),
+          _SectionLabel(label: 'Support'),
           const SizedBox(height: 10),
           _SettingsGroup(items: [
             _SettingItem(
@@ -288,7 +291,55 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
             ),
           ]),
 
+          const SizedBox(height: 20),
+
+          // ── Logout ─────────────────────────────────────
+          _SettingsGroup(items: [
+            _SettingItem(
+              icon: Icons.logout_rounded,
+              label: 'Log Out',
+              iconColor: context.colors.error,
+              labelColor: context.colors.error,
+              onTap: () {
+                _confirmLogout(context, ref, user?.email);
+              },
+              isLast: true,
+            ),
+          ]),
+
           const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+
+  void _confirmLogout(BuildContext context, WidgetRef ref, String? email) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: context.cardColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Log Out', style: TextStyle(color: context.textPrimary)),
+        content: Text(
+          'Are you sure you want to log out?',
+          style: TextStyle(color: context.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel', style: TextStyle(color: context.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              if (email != null) {
+                ref.read(authViewModelProvider.notifier).logout(email);
+              }
+              Navigator.of(context)
+                  .pushNamedAndRemoveUntil('/login', (route) => false);
+            },
+            child: Text('Log Out', style: TextStyle(color: context.colors.error)),
+          ),
         ],
       ),
     );
@@ -298,16 +349,14 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
 // ── Section Label ─────────────────────────────────────────────────────────────
 class _SectionLabel extends StatelessWidget {
   final String label;
-  final String montserrat;
-  const _SectionLabel({required this.label, required this.montserrat});
+  const _SectionLabel({required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Text(
       label.toUpperCase(),
       style: TextStyle(
-        color: Colors.black45,
-        fontFamily: montserrat,
+        color: context.textTertiary,
         fontWeight: FontWeight.w600,
         fontSize: 11,
         letterSpacing: 1.0,
@@ -325,7 +374,7 @@ class _SettingsGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(children: items),
@@ -340,6 +389,8 @@ class _SettingItem extends StatelessWidget {
   final Widget? trailing;
   final VoidCallback onTap;
   final bool isLast;
+  final Color? iconColor;
+  final Color? labelColor;
 
   const _SettingItem({
     required this.icon,
@@ -347,6 +398,8 @@ class _SettingItem extends StatelessWidget {
     this.trailing,
     required this.onTap,
     this.isLast = false,
+    this.iconColor,
+    this.labelColor,
   });
 
   @override
@@ -355,30 +408,24 @@ class _SettingItem extends StatelessWidget {
       children: [
         ListTile(
           onTap: onTap,
-          leading: Icon(icon, color: Colors.black87, size: 22),
+          leading: Icon(icon, color: iconColor ?? context.textPrimary, size: 22),
           title: Text(
             label,
-            style: const TextStyle(
-              color: Colors.black87,
-              fontFamily: 'Montserrat',
+            style: TextStyle(
+              color: labelColor ?? context.textPrimary,
               fontWeight: FontWeight.w500,
               fontSize: 14,
             ),
           ),
           trailing: trailing ??
-              const Icon(Icons.chevron_right_rounded,
-                  color: Colors.black38, size: 20),
+              Icon(Icons.chevron_right_rounded,
+                  color: context.textTertiary, size: 20),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
           dense: true,
         ),
         if (!isLast)
-          const Divider(
-            height: 1,
-            thickness: 0.5,
-            color: Color(0xFFEEEEEE),
-            indent: 52,
-          ),
+          Divider(height: 1, thickness: 0.5, indent: 52),
       ],
     );
   }
@@ -387,23 +434,24 @@ class _SettingItem extends StatelessWidget {
 // ── Listing Card ──────────────────────────────────────────────────────────────
 class _ListingCard extends StatelessWidget {
   final dynamic book;
-  final String montserrat;
-  const _ListingCard({required this.book, required this.montserrat});
+  const _ListingCard({required this.book});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 120,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: context.isDarkMode
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -413,13 +461,14 @@ class _ListingCard extends StatelessWidget {
                 const BorderRadius.vertical(top: Radius.circular(12)),
             child: book.coverImage != null
                 ? Image.network(
-                    'http://192.168.18.118:5000/${book.coverImage}',
+                    // NOTE: keep this in sync with ApiEndpoints.baseUrl
+                    'http://192.168.18.117:5000/${book.coverImage}',
                     height: 100,
                     width: 120,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => _placeholder(),
+                    errorBuilder: (_, __, ___) => _placeholder(context),
                   )
-                : _placeholder(),
+                : _placeholder(context),
           ),
           Padding(
             padding: const EdgeInsets.all(8),
@@ -429,8 +478,7 @@ class _ListingCard extends StatelessWidget {
                 Text(
                   book.title,
                   style: TextStyle(
-                    color: Colors.black87,
-                    fontFamily: montserrat,
+                    color: context.textPrimary,
                     fontWeight: FontWeight.w600,
                     fontSize: 11,
                   ),
@@ -441,8 +489,7 @@ class _ListingCard extends StatelessWidget {
                 Text(
                   'Rs. ${book.price}',
                   style: TextStyle(
-                    color: Colors.black54,
-                    fontFamily: montserrat,
+                    color: context.textSecondary,
                     fontWeight: FontWeight.w700,
                     fontSize: 11,
                   ),
@@ -455,12 +502,14 @@ class _ListingCard extends StatelessWidget {
     );
   }
 
-  Widget _placeholder() {
+  Widget _placeholder(BuildContext context) {
     return Container(
       height: 100,
       width: 120,
-      color: const Color(0xFFF0F0F0),
-      child: const Icon(Icons.book_rounded, color: Colors.black12, size: 36),
+      color: context.isDarkMode
+          ? const Color(0xFF2A2A2A)
+          : const Color(0xFFF0F0F0),
+      child: Icon(Icons.book_rounded, color: context.textTertiary, size: 36),
     );
   }
 }

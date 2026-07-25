@@ -31,6 +31,9 @@ void main() {
       registerUseCase: mockRegisterUseCase,
       loginUseCase: mockLoginUseCase,
       logoutUseCase: mockLogoutUseCase,
+      // No-op callbacks — the notification system isn't under test here.
+      onUserAuthenticated: (_) async {},
+      onUserLoggedOut: () {},
     );
   });
 

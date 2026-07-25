@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kitabghar/core/extensions/context_extensions.dart';
 import 'package:kitabghar/features/dashboard/presentation/pages/sell_page.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -9,8 +10,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  static const _montserrat = 'Montserrat';
-
   static const _categories = [
     _Category('All', Icons.apps_rounded),
     _Category('Programming', Icons.code_rounded),
@@ -35,7 +34,10 @@ class _HomeScreenState extends State<HomeScreen> {
     _Book('Code Complete', 'Steve McConnell', 'Rs. 190', '4.7', 'assets/images/book_10.jpg'),
   ];
 
-  static const _cardColors = [
+  // Light-mode tint backgrounds behind the book cover art.
+  // In dark mode these are dimmed down so they don't glow against
+  // a near-black page.
+  static const _cardColorsLight = [
     Color(0xFFE8F0F7),
     Color(0xFFFFF3E8),
     Color(0xFFEAF7EE),
@@ -48,10 +50,26 @@ class _HomeScreenState extends State<HomeScreen> {
     Color(0xFFF7EEF0),
   ];
 
+  static const _cardColorsDark = [
+    Color(0xFF2A3A47),
+    Color(0xFF473C2A),
+    Color(0xFF2A472F),
+    Color(0xFF472A3A),
+    Color(0xFF2E2E47),
+    Color(0xFF473F2A),
+    Color(0xFF2A4740),
+    Color(0xFF473F2A),
+    Color(0xFF2E2A47),
+    Color(0xFF472A2E),
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final accent = context.colors.primary;
+    final cardColors = context.isDarkMode ? _cardColorsDark : _cardColorsLight;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F0E8),
+      backgroundColor: context.backgroundColor,
 
       // ── Round + FAB ──────────────────────────────────────
       floatingActionButton: GestureDetector(
@@ -65,11 +83,11 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 56,
           height: 56,
           decoration: BoxDecoration(
-            color: const Color(0xFF1D3A52),
+            color: accent,
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF1D3A52).withValues(alpha: 0.35),
+                color: accent.withValues(alpha: 0.35),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -92,19 +110,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text('Good morning 👋',
                             style: TextStyle(
-                                fontFamily: _montserrat,
-                                fontSize: 13,
-                                color: Colors.black45)),
-                        SizedBox(height: 2),
+                                fontSize: 13, color: context.textSecondary)),
+                        const SizedBox(height: 2),
                         Text('Find your next read',
                             style: TextStyle(
-                                fontFamily: _montserrat,
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
-                                color: Color(0xFF1D3A52))),
+                                color: context.textPrimary)),
                       ],
                     ),
                   ],
@@ -118,30 +133,32 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.cardColor,
                     borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4)),
-                    ],
+                    boxShadow: context.isDarkMode
+                        ? null
+                        : [
+                            BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4)),
+                          ],
                   ),
                   child: TextField(
-                    style: const TextStyle(fontFamily: _montserrat, fontSize: 13),
+                    style: TextStyle(fontSize: 13, color: context.textPrimary),
+                    cursorColor: accent,
                     decoration: InputDecoration(
+                      filled: false,
                       hintText: 'Search books, authors…',
-                      hintStyle: const TextStyle(
-                          fontFamily: _montserrat,
-                          fontSize: 13,
-                          color: Colors.black38),
-                      prefixIcon: const Icon(Icons.search,
-                          color: Colors.black38, size: 20),
+                      hintStyle:
+                          TextStyle(fontSize: 13, color: context.textTertiary),
+                      prefixIcon:
+                          Icon(Icons.search, color: context.textTertiary, size: 20),
                       suffixIcon: Container(
                         margin: const EdgeInsets.all(8),
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1D3A52),
+                          color: accent,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(Icons.tune,
@@ -176,21 +193,18 @@ class _HomeScreenState extends State<HomeScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(
-                            color: selected
-                                ? const Color(0xFF1D3A52)
-                                : Colors.white,
+                            color: selected ? accent : context.cardColor,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: selected
-                                  ? const Color(0xFF1D3A52)
-                                  : const Color(0xFFE0D8CC),
+                                  ? accent
+                                  : context.theme.dividerColor,
                               width: 1.5,
                             ),
                             boxShadow: selected
                                 ? [
                                     BoxShadow(
-                                        color: const Color(0xFF1D3A52)
-                                            .withValues(alpha: 0.25),
+                                        color: accent.withValues(alpha: 0.25),
                                         blurRadius: 8,
                                         offset: const Offset(0, 3)),
                                   ]
@@ -202,20 +216,15 @@ class _HomeScreenState extends State<HomeScreen> {
                               Icon(
                                 _categories[i].icon,
                                 size: 14,
-                                color: selected
-                                    ? Colors.white
-                                    : const Color(0xFF1D3A52),
+                                color: selected ? Colors.white : accent,
                               ),
                               const SizedBox(width: 6),
                               Text(
                                 _categories[i].name,
                                 style: TextStyle(
-                                  fontFamily: _montserrat,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
-                                  color: selected
-                                      ? Colors.white
-                                      : const Color(0xFF1D3A52),
+                                  color: selected ? Colors.white : accent,
                                 ),
                               ),
                             ],
@@ -228,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // Trending section header 
+            // Trending section header
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 26, 20, 12),
@@ -241,17 +250,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           width: 4,
                           height: 18,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1D3A52),
+                            color: accent,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const Text('Trending Books',
+                        Text('Trending Books',
                             style: TextStyle(
-                                fontFamily: _montserrat,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w800,
-                                color: Color(0xFF1D3A52))),
+                                color: context.textPrimary)),
                       ],
                     ),
                     TextButton(
@@ -260,18 +268,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           padding: EdgeInsets.zero,
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                      child: const Text('See all',
+                      child: Text('See all',
                           style: TextStyle(
-                              fontFamily: _montserrat,
-                              fontSize: 12,
-                              color: Colors.black45)),
+                              fontSize: 12, color: context.textSecondary)),
                     ),
                   ],
                 ),
               ),
             ),
 
-            // Trending horizontal list 
+            // Trending horizontal list
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 210,
@@ -281,13 +287,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: _books.length,
                   itemBuilder: (_, i) => _TrendingCard(
                     book: _books[i],
-                    color: _cardColors[i],
+                    color: cardColors[i],
                   ),
                 ),
               ),
             ),
 
-            // All Listings header 
+            // All Listings header
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 26, 20, 12),
@@ -297,23 +303,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: 4,
                       height: 18,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1D3A52),
+                        color: accent,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const Text('All Listings',
+                    Text('All Listings',
                         style: TextStyle(
-                            fontFamily: _montserrat,
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF1D3A52))),
+                            color: context.textPrimary)),
                   ],
                 ),
               ),
             ),
 
-            // All Listings grid 
+            // All Listings grid
             // ↓ padding bottom changed to 100 so FAB doesn't cover last card
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
@@ -321,7 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 delegate: SliverChildBuilderDelegate(
                   (_, i) => _GridBookCard(
                     book: _books[i % _books.length],
-                    color: _cardColors[i % _cardColors.length],
+                    color: cardColors[i % cardColors.length],
                   ),
                   childCount: _books.length,
                 ),
@@ -359,22 +364,23 @@ class _TrendingCard extends StatelessWidget {
   final Color color;
   const _TrendingCard({required this.book, required this.color});
 
-  static const _montserrat = 'Montserrat';
-
   @override
   Widget build(BuildContext context) {
+    final accent = context.colors.primary;
     return Container(
       width: 130,
       margin: const EdgeInsets.only(right: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 10,
-              offset: const Offset(0, 4)),
-        ],
+        boxShadow: context.isDarkMode
+            ? null
+            : [
+                BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4)),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -390,10 +396,9 @@ class _TrendingCard extends StatelessWidget {
                 width: double.infinity,
                 height: 120,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Center(
+                errorBuilder: (_, __, ___) => Center(
                   child: Icon(Icons.menu_book_rounded,
-                      size: 48,
-                      color: const Color(0xFF1D3A52).withValues(alpha: 0.4)),
+                      size: 48, color: accent.withValues(alpha: 0.4)),
                 ),
               ),
             ),
@@ -406,38 +411,33 @@ class _TrendingCard extends StatelessWidget {
                 Text(book.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontFamily: _montserrat,
+                    style: TextStyle(
                         fontSize: 11,
-                        fontWeight: FontWeight.w700)),
+                        fontWeight: FontWeight.w700,
+                        color: context.textPrimary)),
                 const SizedBox(height: 2),
                 Text(book.author,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontFamily: _montserrat,
-                        fontSize: 10,
-                        color: Colors.black45)),
+                    style: TextStyle(
+                        fontSize: 10, color: context.textSecondary)),
                 const SizedBox(height: 6),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(book.price,
-                        style: const TextStyle(
-                            fontFamily: _montserrat,
+                        style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF1D3A52))),
+                            color: accent)),
                     Row(
                       children: [
                         const Icon(Icons.star_rounded,
                             size: 12, color: Color(0xFFFFA726)),
                         const SizedBox(width: 2),
                         Text(book.rating,
-                            style: const TextStyle(
-                                fontFamily: _montserrat,
-                                fontSize: 10,
-                                color: Colors.black45)),
+                            style: TextStyle(
+                                fontSize: 10, color: context.textSecondary)),
                       ],
                     ),
                   ],
@@ -457,20 +457,21 @@ class _GridBookCard extends StatelessWidget {
   final Color color;
   const _GridBookCard({required this.book, required this.color});
 
-  static const _montserrat = 'Montserrat';
-
   @override
   Widget build(BuildContext context) {
+    final accent = context.colors.primary;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 10,
-              offset: const Offset(0, 4)),
-        ],
+        boxShadow: context.isDarkMode
+            ? null
+            : [
+                BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4)),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -485,10 +486,9 @@ class _GridBookCard extends StatelessWidget {
                   book.image,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => Center(
+                  errorBuilder: (_, __, ___) => Center(
                     child: Icon(Icons.menu_book_rounded,
-                        size: 48,
-                        color: const Color(0xFF1D3A52).withValues(alpha: 0.4)),
+                        size: 48, color: accent.withValues(alpha: 0.4)),
                   ),
                 ),
               ),
@@ -502,33 +502,30 @@ class _GridBookCard extends StatelessWidget {
                 Text(book.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontFamily: _montserrat,
+                    style: TextStyle(
                         fontSize: 11,
-                        fontWeight: FontWeight.w700)),
+                        fontWeight: FontWeight.w700,
+                        color: context.textPrimary)),
                 const SizedBox(height: 2),
                 Text(book.author,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontFamily: _montserrat,
-                        fontSize: 10,
-                        color: Colors.black45)),
+                    style: TextStyle(
+                        fontSize: 10, color: context.textSecondary)),
                 const SizedBox(height: 6),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(book.price,
-                        style: const TextStyle(
-                            fontFamily: _montserrat,
+                        style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF1D3A52))),
+                            color: accent)),
                     Container(
                       width: 24,
                       height: 24,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1D3A52),
+                        color: accent,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: const Icon(Icons.add,

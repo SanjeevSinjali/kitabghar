@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kitabghar/core/api/api_client.dart';
+import 'package:kitabghar/core/providers/avatar_provider.dart';
+import 'package:kitabghar/core/providers/notification_provider.dart';
 import 'package:kitabghar/core/services/hive/hive_service.dart';
 import 'package:kitabghar/features/auth/data/datasources/local/auth_local_datasource.dart';
 import 'package:kitabghar/features/auth/data/datasources/remote/auth_remote_datasource.dart';
@@ -47,6 +49,14 @@ final authViewModelProvider =
     registerUseCase: ref.read(registerUseCaseProvider),
     loginUseCase: ref.read(loginUseCaseProvider),
     logoutUseCase: ref.read(logoutUseCaseProvider),
+    onUserAuthenticated: (email) async {
+      await ref.read(notificationsProvider.notifier).onUserAuthenticated(email);
+      await ref.read(avatarProvider.notifier).loadForUser(email);
+    },
+    onUserLoggedOut: () {
+      ref.read(notificationsProvider.notifier).clear();
+      ref.read(avatarProvider.notifier).clear();
+    },
   );
 });
 
@@ -54,11 +64,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final RegisterUseCase _registerUseCase;
   final LoginUseCase _loginUseCase;
   final LogoutUseCase _logoutUseCase;
+  final Future<void> Function(String email) onUserAuthenticated;
+  final void Function() onUserLoggedOut;
 
   AuthNotifier({
     required RegisterUseCase registerUseCase,
     required LoginUseCase loginUseCase,
     required LogoutUseCase logoutUseCase,
+    required this.onUserAuthenticated,
+    required this.onUserLoggedOut,
   })  : _registerUseCase = registerUseCase,
         _loginUseCase = loginUseCase,
         _logoutUseCase = logoutUseCase,
@@ -71,6 +85,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       (failure) => state = state.copyWith(isLoading: false, error: failure.message),
       (_) => state = state.copyWith(isLoading: false, isSuccess: true),
     );
+    if (state.isSuccess) {
+      await onUserAuthenticated(entity.email);
+    }
   }
 
   Future<void> login(String email, String password) async {
@@ -81,6 +98,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       (failure) => state = state.copyWith(isLoading: false, error: failure.message),
       (user) => state = state.copyWith(isLoading: false, isSuccess: true, user: user),
     );
+    if (state.isSuccess) {
+      await onUserAuthenticated(email);
+    }
   }
 
   Future<void> logout(String email) async {
@@ -90,6 +110,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       (failure) => state = state.copyWith(isLoading: false, error: failure.message),
       (_) => state = const AuthState(),
     );
+    onUserLoggedOut();
   }
 
   void resetState() => state = const AuthState();
