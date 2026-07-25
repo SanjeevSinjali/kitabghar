@@ -19,7 +19,7 @@ void main() {
     name: 'Test User',
     email: 'test@example.com',
     password: 'password123',
-    phoneNumber: '9800000000',
+    role: 'user',
     token: 'sample-token',
   );
 
@@ -31,7 +31,8 @@ void main() {
       registerUseCase: mockRegisterUseCase,
       loginUseCase: mockLoginUseCase,
       logoutUseCase: mockLogoutUseCase,
-      // No-op callbacks — the notification system isn't under test here.
+      // No-op callbacks — the notification/avatar systems aren't under
+      // test here, we're only testing AuthNotifier's own state transitions.
       onUserAuthenticated: (_) async {},
       onUserLoggedOut: () {},
     );

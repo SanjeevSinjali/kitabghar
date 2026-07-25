@@ -23,11 +23,13 @@ import 'package:kitabghar/features/books/domain/entities/books_entities.dart'
 import 'package:kitabghar/features/books/domain/repositories/books_repository.dart'
     as _i7;
 import 'package:kitabghar/features/books/domain/usecases/create_books_usecase.dart'
-    as _i14;
-import 'package:kitabghar/features/books/domain/usecases/delete_books_usecase.dart'
     as _i15;
+import 'package:kitabghar/features/books/domain/usecases/delete_books_usecase.dart'
+    as _i16;
 import 'package:kitabghar/features/books/domain/usecases/get_all_books_usecase.dart'
     as _i13;
+import 'package:kitabghar/features/books/domain/usecases/get_my_books_usecase.dart'
+    as _i14;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -131,11 +133,18 @@ class MockIBooksRepository extends _i1.Mock implements _i7.IBooksRepository {
   }
 
   @override
-  _i4.Future<_i2.Either<_i5.Failure, List<_i8.BooksEntity>>> getAllBooks() =>
+  _i4.Future<_i2.Either<_i5.Failure, List<_i8.BooksEntity>>> getAllBooks({
+    required String? token,
+    String? category,
+  }) =>
       (super.noSuchMethod(
         Invocation.method(
           #getAllBooks,
           [],
+          {
+            #token: token,
+            #category: category,
+          },
         ),
         returnValue:
             _i4.Future<_i2.Either<_i5.Failure, List<_i8.BooksEntity>>>.value(
@@ -144,6 +153,31 @@ class MockIBooksRepository extends _i1.Mock implements _i7.IBooksRepository {
           Invocation.method(
             #getAllBooks,
             [],
+            {
+              #token: token,
+              #category: category,
+            },
+          ),
+        )),
+      ) as _i4.Future<_i2.Either<_i5.Failure, List<_i8.BooksEntity>>>);
+
+  @override
+  _i4.Future<_i2.Either<_i5.Failure, List<_i8.BooksEntity>>> getMyBooks(
+          {required String? token}) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getMyBooks,
+          [],
+          {#token: token},
+        ),
+        returnValue:
+            _i4.Future<_i2.Either<_i5.Failure, List<_i8.BooksEntity>>>.value(
+                _FakeEither_0<_i5.Failure, List<_i8.BooksEntity>>(
+          this,
+          Invocation.method(
+            #getMyBooks,
+            [],
+            {#token: token},
           ),
         )),
       ) as _i4.Future<_i2.Either<_i5.Failure, List<_i8.BooksEntity>>>);
@@ -289,11 +323,12 @@ class MockGetAllBooksUseCase extends _i1.Mock
   }
 
   @override
-  _i4.Future<_i2.Either<_i5.Failure, List<_i8.BooksEntity>>> call() =>
+  _i4.Future<_i2.Either<_i5.Failure, List<_i8.BooksEntity>>> call(
+          _i13.GetAllBooksParams? params) =>
       (super.noSuchMethod(
         Invocation.method(
           #call,
-          [],
+          [params],
         ),
         returnValue:
             _i4.Future<_i2.Either<_i5.Failure, List<_i8.BooksEntity>>>.value(
@@ -301,7 +336,35 @@ class MockGetAllBooksUseCase extends _i1.Mock
           this,
           Invocation.method(
             #call,
-            [],
+            [params],
+          ),
+        )),
+      ) as _i4.Future<_i2.Either<_i5.Failure, List<_i8.BooksEntity>>>);
+}
+
+/// A class which mocks [GetMyBooksUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockGetMyBooksUseCase extends _i1.Mock implements _i14.GetMyBooksUseCase {
+  MockGetMyBooksUseCase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i4.Future<_i2.Either<_i5.Failure, List<_i8.BooksEntity>>> call(
+          String? token) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #call,
+          [token],
+        ),
+        returnValue:
+            _i4.Future<_i2.Either<_i5.Failure, List<_i8.BooksEntity>>>.value(
+                _FakeEither_0<_i5.Failure, List<_i8.BooksEntity>>(
+          this,
+          Invocation.method(
+            #call,
+            [token],
           ),
         )),
       ) as _i4.Future<_i2.Either<_i5.Failure, List<_i8.BooksEntity>>>);
@@ -311,14 +374,14 @@ class MockGetAllBooksUseCase extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockCreateBooksUseCase extends _i1.Mock
-    implements _i14.CreateBooksUseCase {
+    implements _i15.CreateBooksUseCase {
   MockCreateBooksUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
   _i4.Future<_i2.Either<_i5.Failure, _i8.BooksEntity>> call(
-          _i14.CreateBooksParams? params) =>
+          _i15.CreateBooksParams? params) =>
       (super.noSuchMethod(
         Invocation.method(
           #call,
@@ -339,14 +402,14 @@ class MockCreateBooksUseCase extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockDeleteBooksUseCase extends _i1.Mock
-    implements _i15.DeleteBooksUseCase {
+    implements _i16.DeleteBooksUseCase {
   MockDeleteBooksUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
   _i4.Future<_i2.Either<_i5.Failure, bool>> call(
-          _i15.DeleteBooksParams? params) =>
+          _i16.DeleteBooksParams? params) =>
       (super.noSuchMethod(
         Invocation.method(
           #call,

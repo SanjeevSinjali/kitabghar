@@ -5,9 +5,12 @@ class BooksEntity {
   final String price;
   final String description;
   final String category;
-  final String? coverImage;
+  final String condition;
+  final String? image;
   final String? sellerId;
   final String? sellerName;
+  final String status;
+  final String source;
 
   const BooksEntity({
     this.id,
@@ -16,8 +19,11 @@ class BooksEntity {
     required this.price,
     required this.description,
     required this.category,
-    this.coverImage,
+    this.condition = 'Good',
+    this.image,
     this.sellerId,
     this.sellerName,
+    this.status = 'Active',
+    this.source = 'user',
   });
 }

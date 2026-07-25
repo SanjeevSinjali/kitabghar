@@ -2,11 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kitabghar/core/api/api_endpoints.dart';
 import 'package:kitabghar/core/extensions/context_extensions.dart';
 import 'package:kitabghar/core/providers/avatar_provider.dart';
 import 'package:kitabghar/core/providers/notification_provider.dart';
 import 'package:kitabghar/core/providers/theme_provider.dart';
 import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.dart';
+import 'package:kitabghar/features/books/domain/entities/books_entities.dart';
 import 'package:kitabghar/features/books/presentation/view_model/books_view_model.dart';
 import 'package:kitabghar/features/notifications/presentation/pages/notifications_page.dart';
 
@@ -19,6 +21,17 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfilePageState extends ConsumerState<ProfileScreen> {
   final _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final token = ref.read(authViewModelProvider).user?.token;
+      if (token != null && token.isNotEmpty) {
+        ref.read(booksViewModelProvider.notifier).getMyBooks(token: token);
+      }
+    });
+  }
 
   Future<void> _pickAvatar(String email) async {
     showModalBottomSheet(
@@ -97,9 +110,7 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
     final isDarkMode = ref.watch(themeModeProvider.notifier).isDarkMode;
     final avatarFile = ref.watch(avatarProvider);
 
-    final myListings = booksState.books
-        .where((b) => b.sellerId != null && b.sellerId == user?.id)
-        .toList();
+    final myListings = booksState.myBooks;
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
@@ -433,11 +444,12 @@ class _SettingItem extends StatelessWidget {
 
 // ── Listing Card ──────────────────────────────────────────────────────────────
 class _ListingCard extends StatelessWidget {
-  final dynamic book;
+  final BooksEntity book;
   const _ListingCard({required this.book});
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = ApiEndpoints.bookImageUrl(book.image);
     return Container(
       width: 120,
       decoration: BoxDecoration(
@@ -459,10 +471,9 @@ class _ListingCard extends StatelessWidget {
           ClipRRect(
             borderRadius:
                 const BorderRadius.vertical(top: Radius.circular(12)),
-            child: book.coverImage != null
+            child: imageUrl.isNotEmpty
                 ? Image.network(
-                    // NOTE: keep this in sync with ApiEndpoints.baseUrl
-                    'http://192.168.18.117:5000/${book.coverImage}',
+                    imageUrl,
                     height: 100,
                     width: 120,
                     fit: BoxFit.cover,

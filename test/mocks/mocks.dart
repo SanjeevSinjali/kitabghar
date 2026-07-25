@@ -8,6 +8,7 @@ import 'package:kitabghar/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:kitabghar/features/books/domain/repositories/books_repository.dart';
 import 'package:kitabghar/features/books/domain/usecases/create_books_usecase.dart';
 import 'package:kitabghar/features/books/domain/usecases/get_all_books_usecase.dart';
+import 'package:kitabghar/features/books/domain/usecases/get_my_books_usecase.dart';
 import 'package:kitabghar/features/books/domain/usecases/delete_books_usecase.dart';
 
 @GenerateMocks([
@@ -17,6 +18,7 @@ import 'package:kitabghar/features/books/domain/usecases/delete_books_usecase.da
   RegisterUseCase,
   LogoutUseCase,
   GetAllBooksUseCase,
+  GetMyBooksUseCase,
   CreateBooksUseCase,
   DeleteBooksUseCase,
 ])

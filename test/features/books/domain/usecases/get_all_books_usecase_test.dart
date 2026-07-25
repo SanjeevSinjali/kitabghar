@@ -12,6 +12,8 @@ void main() {
   late MockIBooksRepository mockRepository;
   late GetAllBooksUseCase useCase;
 
+  const tToken = 'test-token';
+
   final tBooks = <BooksEntity>[
     const BooksEntity(
       id: '1',
@@ -19,7 +21,8 @@ void main() {
       author: 'Robert C. Martin',
       price: '500',
       description: 'A handbook of agile software craftsmanship',
-      category: 'Programming',
+      category: 'Other',
+      condition: 'Good',
     ),
     const BooksEntity(
       id: '2',
@@ -27,7 +30,8 @@ void main() {
       author: 'Andrew Hunt',
       price: '450',
       description: 'From journeyman to master',
-      category: 'Programming',
+      category: 'Other',
+      condition: 'Good',
     ),
   ];
 
@@ -38,10 +42,10 @@ void main() {
 
   test('should return a list of books when the repository call succeeds',
       () async {
-    when(mockRepository.getAllBooks())
+    when(mockRepository.getAllBooks(token: tToken))
         .thenAnswer((_) async => Right(tBooks));
 
-    final result = await useCase();
+    final result = await useCase(const GetAllBooksParams(token: tToken));
 
     result.fold(
       (failure) => fail('Expected Right, got Left($failure)'),
@@ -50,21 +54,21 @@ void main() {
         expect(books.first.title, 'Clean Code');
       },
     );
-    verify(mockRepository.getAllBooks()).called(1);
+    verify(mockRepository.getAllBooks(token: tToken)).called(1);
     verifyNoMoreInteractions(mockRepository);
   });
 
   test('should return a Failure when the repository call fails', () async {
     const tFailure = ApiFailure(message: 'Unable to fetch books');
-    when(mockRepository.getAllBooks())
+    when(mockRepository.getAllBooks(token: tToken))
         .thenAnswer((_) async => const Left(tFailure));
 
-    final result = await useCase();
+    final result = await useCase(const GetAllBooksParams(token: tToken));
 
     result.fold(
       (failure) => expect(failure.message, tFailure.message),
       (books) => fail('Expected Left, got Right($books)'),
     );
-    verify(mockRepository.getAllBooks()).called(1);
+    verify(mockRepository.getAllBooks(token: tToken)).called(1);
   });
 }

@@ -4,10 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
+import 'package:kitabghar/core/providers/notification_provider.dart';
 import 'package:kitabghar/features/auth/presentation/pages/signup_page.dart';
 import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.dart';
 
 import '../mocks/mocks.mocks.dart';
+import 'login_page_test.dart' show FakeNotificationService;
 
 void main() {
   late MockLoginUseCase mockLoginUseCase;
@@ -26,6 +28,7 @@ void main() {
         loginUseCaseProvider.overrideWithValue(mockLoginUseCase),
         registerUseCaseProvider.overrideWithValue(mockRegisterUseCase),
         logoutUseCaseProvider.overrideWithValue(mockLogoutUseCase),
+        notificationServiceProvider.overrideWithValue(FakeNotificationService()),
       ],
       child: MaterialApp(
         home: Builder(
@@ -58,8 +61,6 @@ void main() {
         find.widgetWithText(TextFormField, 'example@gmail.com'),
         'jane@example.com');
     await tester.enterText(
-        find.widgetWithText(TextFormField, '98XXXXXXXX'), '9812345678');
-    await tester.enterText(
         find.widgetWithText(TextFormField, 'password'), 'password123');
   }
 
@@ -67,7 +68,9 @@ void main() {
     testWidgets('renders all registration fields', (tester) async {
       await openSignupPage(tester);
 
-      expect(find.byType(TextFormField), findsNWidgets(4));
+      // name, email, password — phone number field was removed since the
+      // new backend (kitabghar_backend) doesn't have a phoneNumber field.
+      expect(find.byType(TextFormField), findsNWidgets(3));
       expect(find.text('Register'), findsOneWidget);
       expect(find.text('Sign up'), findsOneWidget);
     });

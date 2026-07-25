@@ -8,6 +8,7 @@ import 'package:kitabghar/features/books/domain/entities/books_entities.dart';
 import 'package:kitabghar/features/books/domain/usecases/create_books_usecase.dart';
 import 'package:kitabghar/features/books/domain/usecases/delete_books_usecase.dart';
 import 'package:kitabghar/features/books/domain/usecases/get_all_books_usecase.dart';
+import 'package:kitabghar/features/books/domain/usecases/get_my_books_usecase.dart';
 import 'package:kitabghar/features/books/presentation/state/books_state.dart';
 
 // ── Providers ─────────────────────────────────────────────────
@@ -31,6 +32,10 @@ final getAllBooksUseCaseProvider = Provider<GetAllBooksUseCase>((ref) {
   return GetAllBooksUseCase(repository: ref.read(booksRepositoryProvider));
 });
 
+final getMyBooksUseCaseProvider = Provider<GetMyBooksUseCase>((ref) {
+  return GetMyBooksUseCase(repository: ref.read(booksRepositoryProvider));
+});
+
 final createBooksUseCaseProvider = Provider<CreateBooksUseCase>((ref) {
   return CreateBooksUseCase(repository: ref.read(booksRepositoryProvider));
 });
@@ -43,6 +48,7 @@ final booksViewModelProvider =
     StateNotifierProvider<BooksNotifier, BooksState>((ref) {
   return BooksNotifier(
     getAllBooksUseCase: ref.read(getAllBooksUseCaseProvider),
+    getMyBooksUseCase: ref.read(getMyBooksUseCaseProvider),
     createBooksUseCase: ref.read(createBooksUseCaseProvider),
     deleteBooksUseCase: ref.read(deleteBooksUseCaseProvider),
   );
@@ -52,26 +58,43 @@ final booksViewModelProvider =
 
 class BooksNotifier extends StateNotifier<BooksState> {
   final GetAllBooksUseCase _getAllBooksUseCase;
+  final GetMyBooksUseCase _getMyBooksUseCase;
   final CreateBooksUseCase _createBooksUseCase;
   final DeleteBooksUseCase _deleteBooksUseCase;
 
   BooksNotifier({
     required GetAllBooksUseCase getAllBooksUseCase,
+    required GetMyBooksUseCase getMyBooksUseCase,
     required CreateBooksUseCase createBooksUseCase,
     required DeleteBooksUseCase deleteBooksUseCase,
   })  : _getAllBooksUseCase = getAllBooksUseCase,
+        _getMyBooksUseCase = getMyBooksUseCase,
         _createBooksUseCase = createBooksUseCase,
         _deleteBooksUseCase = deleteBooksUseCase,
         super(const BooksState());
 
-  Future<void> getAllBooks() async {
+  /// Loads the admin catalog for Explore (kitabghar_backend only returns
+  /// source: "admin" books here — never other users' listings).
+  Future<void> getAllBooks({required String token, String? category}) async {
     state = state.copyWith(isLoading: true, error: null);
-    final result = await _getAllBooksUseCase();
+    final result = await _getAllBooksUseCase(
+      GetAllBooksParams(token: token, category: category),
+    );
     result.fold(
       (failure) =>
           state = state.copyWith(isLoading: false, error: failure.message),
-      (books) =>
-          state = state.copyWith(isLoading: false, books: books),
+      (books) => state = state.copyWith(isLoading: false, books: books),
+    );
+  }
+
+  /// Loads the current user's own listings — for Profile's "My Listings".
+  Future<void> getMyBooks({required String token}) async {
+    state = state.copyWith(isLoading: true, error: null);
+    final result = await _getMyBooksUseCase(token);
+    result.fold(
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
+      (books) => state = state.copyWith(isLoading: false, myBooks: books),
     );
   }
 
@@ -81,6 +104,7 @@ class BooksNotifier extends StateNotifier<BooksState> {
     required String price,
     required String description,
     required String category,
+    required String condition,
     required String token,
     File? image,
   }) async {
@@ -93,6 +117,7 @@ class BooksNotifier extends StateNotifier<BooksState> {
           price: price,
           description: description,
           category: category,
+          condition: condition,
         ),
         image: image,
         token: token,
@@ -104,7 +129,10 @@ class BooksNotifier extends StateNotifier<BooksState> {
       (book) => state = state.copyWith(
         isLoading: false,
         isSuccess: true,
-        books: [...state.books, book],
+        // New listing always belongs to this user, so add it straight to
+        // myBooks regardless of whether it also appears in the admin
+        // catalog (only true if this account happens to be an admin).
+        myBooks: [book, ...state.myBooks],
       ),
     );
   }
@@ -123,6 +151,7 @@ class BooksNotifier extends StateNotifier<BooksState> {
       (_) => state = state.copyWith(
         isLoading: false,
         books: state.books.where((b) => b.id != id).toList(),
+        myBooks: state.myBooks.where((b) => b.id != id).toList(),
       ),
     );
   }

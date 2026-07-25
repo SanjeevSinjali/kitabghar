@@ -17,14 +17,20 @@ class _SellPageState extends ConsumerState<SellPage> {
   static const _montserrat = 'Montserrat';
 
   static const _categoryList = [
-    'Programming',
-    'Algorithms',
-    'Networking',
-    'Design',
-    'AI / ML',
-    'Operating Systems',
-    'Database',
+    'Fiction',
+    'Non-Fiction',
+    'Academic',
+    'Self-Help',
+    'Biography',
+    "Children's",
+    'Comics',
     'Other',
+  ];
+
+  static const _conditionList = [
+    'Like New',
+    'Good',
+    'Fair',
   ];
 
   final _titleController  = TextEditingController();
@@ -32,6 +38,7 @@ class _SellPageState extends ConsumerState<SellPage> {
   final _priceController  = TextEditingController();
   final _descController   = TextEditingController();
   String? _selectedCategory;
+  String? _selectedCondition;
   File?   _pickedImage;
 
   final _picker = ImagePicker();
@@ -151,6 +158,7 @@ class _SellPageState extends ConsumerState<SellPage> {
         _authorController.text.trim().isEmpty ||
         _priceController.text.trim().isEmpty ||
         _selectedCategory == null ||
+        _selectedCondition == null ||
         _pickedImage == null) {
       SnackbarUtils.showError(
           context, 'Please fill all fields and add a photo.');
@@ -171,6 +179,7 @@ class _SellPageState extends ConsumerState<SellPage> {
       price: _priceController.text.trim(),
       description: _descController.text.trim(),
       category: _selectedCategory!,
+      condition: _selectedCondition!,
       token: token,
       image: _pickedImage,
     );
@@ -184,6 +193,7 @@ class _SellPageState extends ConsumerState<SellPage> {
       _descController.clear();
       setState(() {
         _selectedCategory = null;
+        _selectedCondition = null;
         _pickedImage = null;
       });
       ref.read(booksViewModelProvider.notifier).resetState();
@@ -341,43 +351,22 @@ class _SellPageState extends ConsumerState<SellPage> {
           // ── Category ──────────────────────────────────
           _buildLabel('Category'),
           const SizedBox(height: 6),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE0D8CC)),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedCategory,
-                hint: const Text(
-                  'Select a category',
-                  style: TextStyle(
-                    fontFamily: _montserrat,
-                    fontSize: 13,
-                    color: Colors.black38,
-                  ),
-                ),
-                isExpanded: true,
-                icon: const Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: Colors.black38,
-                ),
-                style: const TextStyle(
-                  fontFamily: _montserrat,
-                  fontSize: 13,
-                  color: Color(0xFF1D3A52),
-                ),
-                items: _categoryList
-                    .map((c) => DropdownMenuItem(
-                          value: c,
-                          child: Text(c),
-                        ))
-                    .toList(),
-                onChanged: (v) => setState(() => _selectedCategory = v),
-              ),
-            ),
+          _buildDropdown(
+            value: _selectedCategory,
+            hint: 'Select a category',
+            items: _categoryList,
+            onChanged: (v) => setState(() => _selectedCategory = v),
+          ),
+          const SizedBox(height: 14),
+
+          // ── Condition ─────────────────────────────────
+          _buildLabel('Condition'),
+          const SizedBox(height: 6),
+          _buildDropdown(
+            value: _selectedCondition,
+            hint: 'Select a condition',
+            items: _conditionList,
+            onChanged: (v) => setState(() => _selectedCondition = v),
           ),
           const SizedBox(height: 14),
 
@@ -487,6 +476,52 @@ class _SellPageState extends ConsumerState<SellPage> {
             horizontal: 14,
             vertical: 13,
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdown({
+    required String? value,
+    required String hint,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE0D8CC)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          hint: Text(
+            hint,
+            style: const TextStyle(
+              fontFamily: _montserrat,
+              fontSize: 13,
+              color: Colors.black38,
+            ),
+          ),
+          isExpanded: true,
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: Colors.black38,
+          ),
+          style: const TextStyle(
+            fontFamily: _montserrat,
+            fontSize: 13,
+            color: Color(0xFF1D3A52),
+          ),
+          items: items
+              .map((c) => DropdownMenuItem(
+                    value: c,
+                    child: Text(c),
+                  ))
+              .toList(),
+          onChanged: onChanged,
         ),
       ),
     );

@@ -18,7 +18,6 @@ class AuthRemoteDataSource implements IAuthDataSource {
           'name': user.name,
           'email': user.email,
           'password': user.password,
-          'phoneNumber': user.phoneNumber,
         },
       );
       return true;
@@ -38,11 +37,14 @@ class AuthRemoteDataSource implements IAuthDataSource {
         },
       );
 
+      // kitabghar_backend returns: { token, user: { id, name, email, role } }
+      final user = response['user'];
+
       return AuthHiveModel(
-        name: response['data']['name'],
-        email: response['data']['email'],
+        name: user['name'],
+        email: user['email'],
         password: password,
-        phoneNumber: response['data']['phoneNumber'] ?? '',
+        role: user['role'] ?? 'user',
         token: response['token'],
       );
     } catch (e) {
@@ -52,6 +54,8 @@ class AuthRemoteDataSource implements IAuthDataSource {
 
   @override
   Future<bool> logout(String email) async {
+    // kitabghar_backend has no server-side logout endpoint — the token
+    // is simply discarded client-side, so there's nothing to call here.
     return true;
   }
 }

@@ -18,9 +18,15 @@ class BooksRepositoryImpl implements IBooksRepository {
         _localDataSource = localDataSource;
 
   @override
-  Future<Either<Failure, List<BooksEntity>>> getAllBooks() async {
+  Future<Either<Failure, List<BooksEntity>>> getAllBooks({
+    required String token,
+    String? category,
+  }) async {
     try {
-      final books = await _remoteDataSource.getAllBooks();
+      final books = await _remoteDataSource.getAllBooks(
+        token: token,
+        category: category,
+      );
       _localDataSource.cacheBooks(books);
       return Right(books.map((b) => b.toEntity()).toList());
     } catch (e) {
@@ -30,6 +36,18 @@ class BooksRepositoryImpl implements IBooksRepository {
       } catch (_) {
         return Left(ApiFailure(message: e.toString()));
       }
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<BooksEntity>>> getMyBooks({
+    required String token,
+  }) async {
+    try {
+      final books = await _remoteDataSource.getMyBooks(token: token);
+      return Right(books.map((b) => b.toEntity()).toList());
+    } catch (e) {
+      return Left(ApiFailure(message: e.toString()));
     }
   }
 
@@ -58,8 +76,7 @@ class BooksRepositoryImpl implements IBooksRepository {
     required String token,
   }) async {
     try {
-      final result =
-          await _remoteDataSource.deleteBook(id, token: token);
+      final result = await _remoteDataSource.deleteBook(id, token: token);
       return Right(result);
     } catch (e) {
       return Left(ApiFailure(message: e.toString()));

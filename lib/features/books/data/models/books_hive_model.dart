@@ -7,9 +7,12 @@ class BooksHiveModel {
   final String price;
   final String description;
   final String category;
-  final String? coverImage;
+  final String condition;
+  final String? image;
   final String? sellerId;
   final String? sellerName;
+  final String status;
+  final String source;
 
   const BooksHiveModel({
     this.id,
@@ -18,9 +21,12 @@ class BooksHiveModel {
     required this.price,
     required this.description,
     required this.category,
-    this.coverImage,
+    this.condition = 'Good',
+    this.image,
     this.sellerId,
     this.sellerName,
+    this.status = 'Active',
+    this.source = 'user',
   });
 
   factory BooksHiveModel.fromJson(Map<String, dynamic> json) {
@@ -30,14 +36,17 @@ class BooksHiveModel {
       author: json['author'] ?? '',
       price: json['price'].toString(),
       description: json['description'] ?? '',
-      category: json['category'] ?? '',
-      coverImage: json['coverImage'],
+      category: json['category'] ?? 'Other',
+      condition: json['condition'] ?? 'Good',
+      image: json['image'],
       sellerId: json['seller'] is Map
           ? json['seller']['_id']
           : json['seller'],
       sellerName: json['seller'] is Map
           ? json['seller']['name']
           : null,
+      status: json['status'] ?? 'Active',
+      source: json['source'] ?? 'user',
     );
   }
 
@@ -48,6 +57,7 @@ class BooksHiveModel {
       'price': price,
       'description': description,
       'category': category,
+      'condition': condition,
     };
   }
 
@@ -59,9 +69,12 @@ class BooksHiveModel {
       price: price,
       description: description,
       category: category,
-      coverImage: coverImage,
+      condition: condition,
+      image: image,
       sellerId: sellerId,
       sellerName: sellerName,
+      status: status,
+      source: source,
     );
   }
 
@@ -73,9 +86,12 @@ class BooksHiveModel {
       price: entity.price,
       description: entity.description,
       category: entity.category,
-      coverImage: entity.coverImage,
+      condition: entity.condition,
+      image: entity.image,
       sellerId: entity.sellerId,
       sellerName: entity.sellerName,
+      status: entity.status,
+      source: entity.source,
     );
   }
 }

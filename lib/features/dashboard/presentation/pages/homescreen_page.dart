@@ -396,7 +396,7 @@ class _TrendingCard extends StatelessWidget {
                 width: double.infinity,
                 height: 120,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Center(
+                errorBuilder: (_, _, _) => Center(
                   child: Icon(Icons.menu_book_rounded,
                       size: 48, color: accent.withValues(alpha: 0.4)),
                 ),
@@ -486,7 +486,7 @@ class _GridBookCard extends StatelessWidget {
                   book.image,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Center(
+                  errorBuilder: (_, _, _) => Center(
                     child: Icon(Icons.menu_book_rounded,
                         size: 48, color: accent.withValues(alpha: 0.4)),
                   ),

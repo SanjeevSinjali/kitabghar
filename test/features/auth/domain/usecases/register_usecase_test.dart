@@ -16,7 +16,6 @@ void main() {
     name: 'New User',
     email: 'new.user@example.com',
     password: 'strongPass1',
-    phoneNumber: '9811111111',
   );
 
   setUp(() {

@@ -19,7 +19,7 @@ void main() {
     name: 'Test User',
     email: tEmail,
     password: tPassword,
-    phoneNumber: '9800000000',
+    role: 'user',
     token: 'sample-token',
   );
 

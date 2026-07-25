@@ -12,7 +12,7 @@ class AuthHiveModel extends HiveObject {
   @HiveField(2)
   final String password;
   @HiveField(3)
-  final String phoneNumber;
+  final String role;
   @HiveField(4)
   final String? token;
 
@@ -20,7 +20,7 @@ class AuthHiveModel extends HiveObject {
     required this.name,
     required this.email,
     required this.password,
-    required this.phoneNumber,
+    this.role = 'user',
     this.token,
   });
 
@@ -28,7 +28,7 @@ class AuthHiveModel extends HiveObject {
         name: entity.name,
         email: entity.email,
         password: entity.password,
-        phoneNumber: entity.phoneNumber,
+        role: entity.role,
         token: entity.token,
       );
 
@@ -36,7 +36,7 @@ class AuthHiveModel extends HiveObject {
         name: name,
         email: email,
         password: password,
-        phoneNumber: phoneNumber,
+        role: role,
         token: token,
       );
 }

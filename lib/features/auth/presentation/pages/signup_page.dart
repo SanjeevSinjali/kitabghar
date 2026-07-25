@@ -16,7 +16,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
-  final _phoneCtrl = TextEditingController();
 
   bool _obscure = true;
   bool _agree = false;
@@ -26,7 +25,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     _nameCtrl.dispose();
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
-    _phoneCtrl.dispose();
     super.dispose();
   }
 
@@ -42,7 +40,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
               name: _nameCtrl.text.trim(),
               email: _emailCtrl.text.trim(),
               password: _passwordCtrl.text.trim(),
-              phoneNumber: _phoneCtrl.text.trim(),
             ),
           );
     }
@@ -169,22 +166,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                         validator: (v) =>
                             (v == null || v.trim().isEmpty)
                                 ? 'Please enter email'
-                                : null,
-                      ),
-                      const SizedBox(height: 12),
-                      const Text('Phone Number',
-                          style: TextStyle(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 6),
-                      TextFormField(
-                        controller: _phoneCtrl,
-                        keyboardType: TextInputType.phone,
-                        decoration: _fieldDecoration(
-                            '98XXXXXXXX', Icons.phone_outlined),
-                        validator: (v) =>
-                            (v == null || v.length < 7)
-                                ? 'Enter a valid phone number'
                                 : null,
                       ),
                       const SizedBox(height: 12),

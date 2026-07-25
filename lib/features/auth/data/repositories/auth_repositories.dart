@@ -40,7 +40,7 @@ class AuthRepositoryImpl implements IAuthRepository {
           name: model.name,
           email: model.email,
           password: password,
-          phoneNumber: model.phoneNumber,
+          role: model.role,
           token: model.token, // ← token saved here
         ),
       );
@@ -51,7 +51,7 @@ class AuthRepositoryImpl implements IAuthRepository {
           name: model.name,
           email: model.email,
           password: password,
-          phoneNumber: model.phoneNumber,
+          role: model.role,
           token: model.token, // ← token in entity
         ),
       );

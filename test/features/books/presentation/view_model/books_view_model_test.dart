@@ -9,9 +9,12 @@ import '../../../../mocks/mocks.mocks.dart';
 
 void main() {
   late MockGetAllBooksUseCase mockGetAllBooksUseCase;
+  late MockGetMyBooksUseCase mockGetMyBooksUseCase;
   late MockCreateBooksUseCase mockCreateBooksUseCase;
   late MockDeleteBooksUseCase mockDeleteBooksUseCase;
   late BooksNotifier notifier;
+
+  const tToken = 'test-token';
 
   final tBooks = <BooksEntity>[
     const BooksEntity(
@@ -20,7 +23,8 @@ void main() {
       author: 'Robert C. Martin',
       price: '500',
       description: 'A handbook of agile software craftsmanship',
-      category: 'Programming',
+      category: 'Other',
+      condition: 'Good',
     ),
     const BooksEntity(
       id: '2',
@@ -28,16 +32,19 @@ void main() {
       author: 'James Clear',
       price: '350',
       description: 'An easy and proven way to build good habits',
-      category: 'Self-help',
+      category: 'Self-Help',
+      condition: 'Like New',
     ),
   ];
 
   setUp(() {
     mockGetAllBooksUseCase = MockGetAllBooksUseCase();
+    mockGetMyBooksUseCase = MockGetMyBooksUseCase();
     mockCreateBooksUseCase = MockCreateBooksUseCase();
     mockDeleteBooksUseCase = MockDeleteBooksUseCase();
     notifier = BooksNotifier(
       getAllBooksUseCase: mockGetAllBooksUseCase,
+      getMyBooksUseCase: mockGetMyBooksUseCase,
       createBooksUseCase: mockCreateBooksUseCase,
       deleteBooksUseCase: mockDeleteBooksUseCase,
     );
@@ -45,9 +52,10 @@ void main() {
 
   test('getAllBooks() should populate the state with the fetched books',
       () async {
-    when(mockGetAllBooksUseCase.call()).thenAnswer((_) async => Right(tBooks));
+    when(mockGetAllBooksUseCase.call(any))
+        .thenAnswer((_) async => Right(tBooks));
 
-    await notifier.getAllBooks();
+    await notifier.getAllBooks(token: tToken);
 
     expect(notifier.state.isLoading, false);
     expect(notifier.state.error, null);
@@ -57,13 +65,14 @@ void main() {
 
   test('deleteBook() should remove the deleted book from the state',
       () async {
-    when(mockGetAllBooksUseCase.call()).thenAnswer((_) async => Right(tBooks));
-    await notifier.getAllBooks();
+    when(mockGetAllBooksUseCase.call(any))
+        .thenAnswer((_) async => Right(tBooks));
+    await notifier.getAllBooks(token: tToken);
 
     when(mockDeleteBooksUseCase.call(any))
         .thenAnswer((_) async => const Right(true));
 
-    await notifier.deleteBook(id: '1', token: 'tok');
+    await notifier.deleteBook(id: '1', token: tToken);
 
     expect(notifier.state.isLoading, false);
     expect(notifier.state.error, null);

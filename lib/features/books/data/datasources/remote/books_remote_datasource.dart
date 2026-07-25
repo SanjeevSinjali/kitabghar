@@ -11,9 +11,37 @@ class BooksRemoteDataSource implements IBooksDataSource {
       : _apiClient = apiClient;
 
   @override
-  Future<List<BooksHiveModel>> getAllBooks() async {
+  Future<List<BooksHiveModel>> getAllBooks({
+    String? token,
+    String? category,
+  }) async {
     try {
-      final response = await _apiClient.get(ApiEndpoints.books);
+      // kitabghar_backend's /featured endpoint defaults to only 6 books
+      // per page — pass a high limit so we get the whole admin catalog
+      // in one call (there's no pagination UI built yet).
+      final query = <String, String>{'limit': '100'};
+      if (category != null && category != 'All') {
+        query['category'] = category;
+      }
+      final queryString =
+          query.entries.map((e) => '${e.key}=${Uri.encodeComponent(e.value)}').join('&');
+
+      final response = await _apiClient.get(
+        '${ApiEndpoints.featuredBooks}?$queryString',
+        token: token,
+      );
+      final List data = response['data'];
+      return data.map((e) => BooksHiveModel.fromJson(e)).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<BooksHiveModel>> getMyBooks({required String token}) async {
+    try {
+      final response =
+          await _apiClient.get(ApiEndpoints.myBooks, token: token);
       final List data = response['data'];
       return data.map((e) => BooksHiveModel.fromJson(e)).toList();
     } catch (e) {
@@ -32,7 +60,7 @@ class BooksRemoteDataSource implements IBooksDataSource {
         ApiEndpoints.books,
         fields: book.toFields(),
         file: image,
-        fileField: 'coverImage',
+        fileField: 'image',
         token: token,
       );
       return BooksHiveModel.fromJson(response['data']);
