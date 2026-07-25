@@ -72,7 +72,7 @@ class BooksRemoteDataSource implements IBooksDataSource {
   @override
   Future<bool> deleteBook(String id, {required String token}) async {
     try {
-      await _apiClient.post(
+      await _apiClient.delete(
         '${ApiEndpoints.books}/$id',
         token: token,
       );

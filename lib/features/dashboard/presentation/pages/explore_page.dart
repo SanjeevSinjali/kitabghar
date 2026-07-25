@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kitabghar/core/api/api_endpoints.dart';
 import 'package:kitabghar/core/extensions/context_extensions.dart';
+import 'package:kitabghar/core/utils/snackbar_utils.dart';
 import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.dart';
 import 'package:kitabghar/features/books/domain/entities/books_entities.dart';
 import 'package:kitabghar/features/books/presentation/view_model/books_view_model.dart';
+import 'package:kitabghar/features/wishlist/domain/entities/wishlist_entity.dart';
+import 'package:kitabghar/features/wishlist/presentation/view_model/wishlist_view_model.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -39,6 +42,8 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     final token = ref.read(authViewModelProvider).user?.token;
     if (token == null || token.isEmpty) return;
     ref.read(booksViewModelProvider.notifier).getAllBooks(token: token);
+    // Also load wishlist so the heart icons reflect current state.
+    ref.read(wishlistViewModelProvider.notifier).getWishlist(token: token);
   }
 
   List<BooksEntity> _filtered(List<BooksEntity> books) {
@@ -227,7 +232,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   }
 }
 
-class _BookCard extends StatelessWidget {
+class _BookCard extends ConsumerWidget {
   final BooksEntity book;
   const _BookCard({required this.book});
 
@@ -244,9 +249,33 @@ class _BookCard extends StatelessWidget {
     }
   }
 
+  Future<void> _toggleWishlist(BuildContext context, WidgetRef ref) async {
+    final token = ref.read(authViewModelProvider).user?.token;
+    if (token == null || token.isEmpty || book.id == null) return;
+
+    final error = await ref.read(wishlistViewModelProvider.notifier).toggleWishlist(
+          token: token,
+          item: WishlistEntity(
+            bookId: book.id!,
+            title: book.title,
+            author: book.author,
+            price: book.price,
+            image: book.image ?? '',
+            condition: book.condition,
+          ),
+        );
+
+    if (error != null && context.mounted) {
+      // Most likely the backend's hard 5-item wishlist limit.
+      SnackbarUtils.showError(context, error);
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final imageUrl = ApiEndpoints.bookImageUrl(book.image);
+    final isWishlisted = book.id != null &&
+        ref.watch(wishlistViewModelProvider).isWishlisted(book.id!);
 
     return Container(
       decoration: BoxDecoration(
@@ -323,6 +352,28 @@ class _BookCard extends StatelessWidget {
                         color: Colors.white,
                         fontSize: 9,
                         fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+                // ── Wishlist heart ──────────────────────
+                Positioned(
+                  bottom: 8,
+                  right: 8,
+                  child: GestureDetector(
+                    onTap: () => _toggleWishlist(context, ref),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.55),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        isWishlisted
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
+                        color: isWishlisted ? Colors.redAccent : Colors.white,
+                        size: 16,
                       ),
                     ),
                   ),
