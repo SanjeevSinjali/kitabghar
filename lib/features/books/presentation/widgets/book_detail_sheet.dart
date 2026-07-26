@@ -6,8 +6,10 @@ import 'package:kitabghar/core/providers/notification_provider.dart';
 import 'package:kitabghar/core/utils/snackbar_utils.dart';
 import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.dart';
 import 'package:kitabghar/features/books/domain/entities/books_entities.dart';
-import 'package:kitabghar/features/dashboard/presentation/widgets/book_card.dart';
+import 'package:kitabghar/features/books/presentation/widgets/book_card.dart';
+import 'package:kitabghar/features/purchases/domain/entities/khalti_session.dart';
 import 'package:kitabghar/features/purchases/domain/entities/purchase_entity.dart';
+import 'package:kitabghar/features/purchases/presentation/pages/khalti_checkout_page.dart';
 import 'package:kitabghar/features/purchases/presentation/view_model/purchase_view_model.dart';
 import 'package:kitabghar/features/wishlist/presentation/view_model/wishlist_view_model.dart';
 
@@ -58,23 +60,76 @@ class _BookDetailSheetState extends ConsumerState<BookDetailSheet> {
   bool _isBuying = false;
 
   Future<void> _buyNow() async {
+    print('=== BUY NOW TAPPED (Khalti flow) ===');
     final book = widget.book;
     final authState = ref.read(authViewModelProvider).user;
     if (authState?.token == null || book.id == null) return;
 
     setState(() => _isBuying = true);
 
-    final error = await ref.read(purchaseViewModelProvider.notifier).buyBook(
-          token: authState!.token!,
-          item: PurchaseEntity(
-            bookId: book.id!,
-            title: book.title,
-            author: book.author,
-            price: book.price,
-            image: book.image ?? '',
-            condition: book.condition,
-          ),
+    final purchaseItem = PurchaseEntity(
+      bookId: book.id!,
+      title: book.title,
+      author: book.author,
+      price: book.price,
+      image: book.image ?? '',
+      condition: book.condition,
+    );
+
+    // ── Step 1: ask the backend to start a Khalti payment session ──
+    print('=== STEP 1: calling initiateKhaltiPayment ===');
+    final initiateResult = await ref
+        .read(purchaseViewModelProvider.notifier)
+        .initiateKhaltiPayment(token: authState!.token!, item: purchaseItem);
+
+    KhaltiSession? session;
+    String? initiateError;
+    initiateResult.fold(
+      (failure) => initiateError = failure.message,
+      (s) => session = s,
+    );
+    print('=== STEP 1 RESULT: session=${session?.paymentUrl}, error=$initiateError ===');
+
+    if (session == null) {
+      if (!mounted) return;
+      setState(() => _isBuying = false);
+      SnackbarUtils.showError(context, initiateError ?? 'Could not start payment.');
+      return;
+    }
+
+    if (!mounted) return;
+
+    // ── Step 2: open Khalti's checkout page and wait for the result ──
+    print('=== STEP 2: pushing KhaltiCheckoutPage ===');
+    final status = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => KhaltiCheckoutPage(paymentUrl: session!.paymentUrl),
+      ),
+    );
+    print('=== STEP 2 RESULT: status=$status ===');
+
+    if (!mounted) return;
+
+    if (status != 'Completed') {
+      setState(() => _isBuying = false);
+      SnackbarUtils.showError(
+        context,
+        status == 'Cancelled' || status == null
+            ? 'Payment was cancelled.'
+            : 'Payment was not completed (status: $status).',
+      );
+      return;
+    }
+
+    // ── Step 3: verify server-side and complete the purchase ──
+    print('=== STEP 3: calling verifyKhaltiPayment ===');
+    final error = await ref.read(purchaseViewModelProvider.notifier).verifyKhaltiPayment(
+          token: authState.token!,
+          pidx: session!.pidx,
+          item: purchaseItem,
         );
+    print('=== STEP 3 RESULT: error=$error ===');
 
     if (!mounted) return;
     setState(() => _isBuying = false);
@@ -148,7 +203,7 @@ class _BookDetailSheetState extends ConsumerState<BookDetailSheet> {
                         ? Image.network(
                             imageUrl,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
+                            errorBuilder: (_, _, _) => Container(
                               color: context.isDarkMode
                                   ? const Color(0xFF2A2A2A)
                                   : const Color(0xFFF0F0F0),

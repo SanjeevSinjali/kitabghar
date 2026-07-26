@@ -4,8 +4,8 @@ import 'package:kitabghar/core/extensions/context_extensions.dart';
 import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.dart';
 import 'package:kitabghar/features/books/domain/entities/books_entities.dart';
 import 'package:kitabghar/features/books/presentation/view_model/books_view_model.dart';
-import 'package:kitabghar/features/dashboard/presentation/widgets/book_card.dart';
-import 'package:kitabghar/features/dashboard/presentation/widgets/book_detail_sheet.dart';
+import 'package:kitabghar/features/books/presentation/widgets/book_card.dart';
+import 'package:kitabghar/features/books/presentation/widgets/book_detail_sheet.dart';
 import 'package:kitabghar/features/wishlist/presentation/view_model/wishlist_view_model.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {

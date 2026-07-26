@@ -90,7 +90,7 @@ class BookCard extends ConsumerWidget {
                           ? Image.network(
                               imageUrl,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => _placeholder(context),
+                              errorBuilder: (_, _, _) => _placeholder(context),
                               loadingBuilder: (_, child, progress) =>
                                   progress == null ? child : _placeholder(context),
                             )

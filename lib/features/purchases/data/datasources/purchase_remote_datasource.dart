@@ -25,4 +25,33 @@ class PurchaseRemoteDataSource {
     );
     return PurchaseModel.fromJson(response['data']);
   }
+
+  /// Returns the raw {pidx, paymentUrl} map from the backend.
+  Future<Map<String, dynamic>> initiateKhaltiPayment({
+    required String token,
+    required PurchaseModel item,
+  }) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.khaltiInitiate,
+      token: token,
+      body: item.toBody(),
+    );
+    return response['data'];
+  }
+
+  Future<PurchaseModel> verifyKhaltiPayment({
+    required String token,
+    required String pidx,
+    required PurchaseModel item,
+  }) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.khaltiVerify,
+      token: token,
+      body: {
+        'pidx': pidx,
+        ...item.toBody(),
+      },
+    );
+    return PurchaseModel.fromJson(response['data']);
+  }
 }

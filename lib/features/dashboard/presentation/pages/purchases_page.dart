@@ -100,7 +100,7 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: state.purchases.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) => _PurchaseTile(item: state.purchases[index]),
     );
   }
@@ -150,7 +150,7 @@ class _PurchaseTile extends StatelessWidget {
                   ? Image.network(
                       imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _placeholder(context),
+                      errorBuilder: (_, _, _) => _placeholder(context),
                     )
                   : _placeholder(context),
             ),

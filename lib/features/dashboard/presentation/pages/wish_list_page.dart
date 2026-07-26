@@ -108,7 +108,7 @@ class _WishListScreenState extends ConsumerState<WishListScreen> {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: state.items.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) => _WishlistTile(
         item: state.items[index],
         onRemove: () => _remove(state.items[index]),
@@ -158,7 +158,7 @@ class _WishlistTile extends StatelessWidget {
                   ? Image.network(
                       imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _placeholder(context),
+                      errorBuilder: (_, _, _) => _placeholder(context),
                     )
                   : _placeholder(context),
             ),

@@ -1,8 +1,7 @@
 class ApiEndpoints {
   ApiEndpoints._();
 
-  // Replace with your computer's current LAN IP (same as before —
-  // just the port/path prefix changed to match kitabghar_backend).
+  // Replace with your computer's current LAN IP.
   static const String baseUrl = "http://192.168.18.119:5000/api/v1";
 
   /// Host without the /api/v1 suffix — used to build URLs for uploaded
@@ -11,8 +10,6 @@ class ApiEndpoints {
 
   static String bookImageUrl(String? image) {
     if (image == null || image.isEmpty) return '';
-    // kitabghar_backend already returns a path like "/books/xxx.jpg"
-    // for the image field, so we just prefix the host.
     return '$baseHost$image';
   }
 
@@ -39,4 +36,6 @@ class ApiEndpoints {
 
   // Purchases
   static const String purchases = "$baseUrl/purchases";
+  static const String khaltiInitiate = "$baseUrl/purchases/khalti/initiate";
+  static const String khaltiVerify = "$baseUrl/purchases/khalti/verify";
 }
