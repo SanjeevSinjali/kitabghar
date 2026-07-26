@@ -1,3 +1,4 @@
+import 'package:kitabghar/features/books/domain/usecases/update_books_usecase.dart';
 import 'package:mockito/annotations.dart';
 
 import 'package:kitabghar/features/auth/domain/repositories/auth_reposity.dart';
@@ -20,6 +21,7 @@ import 'package:kitabghar/features/books/domain/usecases/delete_books_usecase.da
   GetAllBooksUseCase,
   GetMyBooksUseCase,
   CreateBooksUseCase,
+  UpdateBookUseCase,
   DeleteBooksUseCase,
 ])
 void main() {}

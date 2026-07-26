@@ -60,7 +60,6 @@ class _BookDetailSheetState extends ConsumerState<BookDetailSheet> {
   bool _isBuying = false;
 
   Future<void> _buyNow() async {
-    print('=== BUY NOW TAPPED (Khalti flow) ===');
     final book = widget.book;
     final authState = ref.read(authViewModelProvider).user;
     if (authState?.token == null || book.id == null) return;
@@ -77,7 +76,6 @@ class _BookDetailSheetState extends ConsumerState<BookDetailSheet> {
     );
 
     // ── Step 1: ask the backend to start a Khalti payment session ──
-    print('=== STEP 1: calling initiateKhaltiPayment ===');
     final initiateResult = await ref
         .read(purchaseViewModelProvider.notifier)
         .initiateKhaltiPayment(token: authState!.token!, item: purchaseItem);
@@ -88,7 +86,6 @@ class _BookDetailSheetState extends ConsumerState<BookDetailSheet> {
       (failure) => initiateError = failure.message,
       (s) => session = s,
     );
-    print('=== STEP 1 RESULT: session=${session?.paymentUrl}, error=$initiateError ===');
 
     if (session == null) {
       if (!mounted) return;
@@ -100,14 +97,12 @@ class _BookDetailSheetState extends ConsumerState<BookDetailSheet> {
     if (!mounted) return;
 
     // ── Step 2: open Khalti's checkout page and wait for the result ──
-    print('=== STEP 2: pushing KhaltiCheckoutPage ===');
     final status = await Navigator.push<String>(
       context,
       MaterialPageRoute(
         builder: (_) => KhaltiCheckoutPage(paymentUrl: session!.paymentUrl),
       ),
     );
-    print('=== STEP 2 RESULT: status=$status ===');
 
     if (!mounted) return;
 
@@ -123,13 +118,11 @@ class _BookDetailSheetState extends ConsumerState<BookDetailSheet> {
     }
 
     // ── Step 3: verify server-side and complete the purchase ──
-    print('=== STEP 3: calling verifyKhaltiPayment ===');
     final error = await ref.read(purchaseViewModelProvider.notifier).verifyKhaltiPayment(
           token: authState.token!,
           pidx: session!.pidx,
           item: purchaseItem,
         );
-    print('=== STEP 3 RESULT: error=$error ===');
 
     if (!mounted) return;
     setState(() => _isBuying = false);
@@ -331,6 +324,24 @@ class _BookDetailSheetState extends ConsumerState<BookDetailSheet> {
                 alignment: Alignment.center,
                 child: Text(
                   'This is your own listing',
+                  style: TextStyle(
+                    color: context.textSecondary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              )
+            else if (book.status == 'Sold')
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: context.cardColor,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'This book has already been sold',
                   style: TextStyle(
                     color: context.textSecondary,
                     fontWeight: FontWeight.w600,

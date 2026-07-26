@@ -71,6 +71,36 @@ class BooksRepositoryImpl implements IBooksRepository {
   }
 
   @override
+  Future<Either<Failure, BooksEntity>> updateBook({
+    required String id,
+    required String token,
+    String? title,
+    String? author,
+    String? price,
+    String? description,
+    String? category,
+    String? condition,
+    File? image,
+  }) async {
+    try {
+      final updated = await _remoteDataSource.updateBook(
+        id: id,
+        token: token,
+        title: title,
+        author: author,
+        price: price,
+        description: description,
+        category: category,
+        condition: condition,
+        image: image,
+      );
+      return Right(updated.toEntity());
+    } catch (e) {
+      return Left(ApiFailure(message: e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, bool>> deleteBook(
     String id, {
     required String token,

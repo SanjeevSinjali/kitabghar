@@ -47,13 +47,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   List<BooksEntity> _filtered(List<BooksEntity> books) {
     return books.where((b) {
-      final isActive = b.status == 'Active';
       final matchesCategory =
           _selectedCategory == 'All' || b.category == _selectedCategory;
       final matchesQuery = _query.isEmpty ||
           b.title.toLowerCase().contains(_query.toLowerCase()) ||
           b.author.toLowerCase().contains(_query.toLowerCase());
-      return isActive && matchesCategory && matchesQuery;
+      return matchesCategory && matchesQuery;
     }).toList();
   }
 

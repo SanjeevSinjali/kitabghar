@@ -3,12 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.dart';
 import 'package:kitabghar/features/books/data/datasources/local/books_local_datasource.dart';
 import 'package:kitabghar/features/books/data/datasources/remote/books_remote_datasource.dart';
-import 'package:kitabghar/features/books/data/repositories/books_repository.dart';
+import 'package:kitabghar/features/books/data/repositories/books_repository_impl.dart';
 import 'package:kitabghar/features/books/domain/entities/books_entities.dart';
 import 'package:kitabghar/features/books/domain/usecases/create_books_usecase.dart';
 import 'package:kitabghar/features/books/domain/usecases/delete_books_usecase.dart';
 import 'package:kitabghar/features/books/domain/usecases/get_all_books_usecase.dart';
 import 'package:kitabghar/features/books/domain/usecases/get_my_books_usecase.dart';
+import 'package:kitabghar/features/books/domain/usecases/update_books_usecase.dart';
 import 'package:kitabghar/features/books/presentation/state/books_state.dart';
 
 // ── Providers ─────────────────────────────────────────────────
@@ -40,6 +41,10 @@ final createBooksUseCaseProvider = Provider<CreateBooksUseCase>((ref) {
   return CreateBooksUseCase(repository: ref.read(booksRepositoryProvider));
 });
 
+final updateBookUseCaseProvider = Provider<UpdateBookUseCase>((ref) {
+  return UpdateBookUseCase(repository: ref.read(booksRepositoryProvider));
+});
+
 final deleteBooksUseCaseProvider = Provider<DeleteBooksUseCase>((ref) {
   return DeleteBooksUseCase(repository: ref.read(booksRepositoryProvider));
 });
@@ -50,6 +55,7 @@ final booksViewModelProvider =
     getAllBooksUseCase: ref.read(getAllBooksUseCaseProvider),
     getMyBooksUseCase: ref.read(getMyBooksUseCaseProvider),
     createBooksUseCase: ref.read(createBooksUseCaseProvider),
+    updateBookUseCase: ref.read(updateBookUseCaseProvider),
     deleteBooksUseCase: ref.read(deleteBooksUseCaseProvider),
   );
 });
@@ -60,16 +66,19 @@ class BooksNotifier extends StateNotifier<BooksState> {
   final GetAllBooksUseCase _getAllBooksUseCase;
   final GetMyBooksUseCase _getMyBooksUseCase;
   final CreateBooksUseCase _createBooksUseCase;
+  final UpdateBookUseCase _updateBookUseCase;
   final DeleteBooksUseCase _deleteBooksUseCase;
 
   BooksNotifier({
     required GetAllBooksUseCase getAllBooksUseCase,
     required GetMyBooksUseCase getMyBooksUseCase,
     required CreateBooksUseCase createBooksUseCase,
+    required UpdateBookUseCase updateBookUseCase,
     required DeleteBooksUseCase deleteBooksUseCase,
   })  : _getAllBooksUseCase = getAllBooksUseCase,
         _getMyBooksUseCase = getMyBooksUseCase,
         _createBooksUseCase = createBooksUseCase,
+        _updateBookUseCase = updateBookUseCase,
         _deleteBooksUseCase = deleteBooksUseCase,
         super(const BooksState());
 
@@ -137,6 +146,46 @@ class BooksNotifier extends StateNotifier<BooksState> {
     );
   }
 
+  /// Returns null on success (state updated), or an error message.
+  Future<String?> updateBook({
+    required String id,
+    required String token,
+    String? title,
+    String? author,
+    String? price,
+    String? description,
+    String? category,
+    String? condition,
+    File? image,
+  }) async {
+    final result = await _updateBookUseCase(
+      UpdateBookParams(
+        id: id,
+        token: token,
+        title: title,
+        author: author,
+        price: price,
+        description: description,
+        category: category,
+        condition: condition,
+        image: image,
+      ),
+    );
+
+    String? errorMessage;
+    result.fold(
+      (failure) => errorMessage = failure.message,
+      (updated) {
+        state = state.copyWith(
+          books: state.books.map((b) => b.id == id ? updated : b).toList(),
+          myBooks:
+              state.myBooks.map((b) => b.id == id ? updated : b).toList(),
+        );
+      },
+    );
+    return errorMessage;
+  }
+
   Future<void> deleteBook({
     required String id,
     required String token,
@@ -151,6 +200,8 @@ class BooksNotifier extends StateNotifier<BooksState> {
       (_) => state = state.copyWith(
         isLoading: false,
         books: state.books.where((b) => b.id != id).toList(),
+        // This was missing before — deleting from My Listings wasn't
+        // actually removing it from the myBooks list.
         myBooks: state.myBooks.where((b) => b.id != id).toList(),
       ),
     );

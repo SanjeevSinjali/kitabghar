@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kitabghar/core/api/api_client.dart';
-import 'package:kitabghar/core/providers/avatar_provider.dart';
 import 'package:kitabghar/core/providers/notification_provider.dart';
 import 'package:kitabghar/core/services/hive/hive_service.dart';
 import 'package:kitabghar/features/auth/data/datasources/local/auth_local_datasource.dart';
@@ -49,14 +48,9 @@ final authViewModelProvider =
     registerUseCase: ref.read(registerUseCaseProvider),
     loginUseCase: ref.read(loginUseCaseProvider),
     logoutUseCase: ref.read(logoutUseCaseProvider),
-    onUserAuthenticated: (email) async {
-      await ref.read(notificationsProvider.notifier).onUserAuthenticated(email);
-      await ref.read(avatarProvider.notifier).loadForUser(email);
-    },
-    onUserLoggedOut: () {
-      ref.read(notificationsProvider.notifier).clear();
-      ref.read(avatarProvider.notifier).clear();
-    },
+    onUserAuthenticated: (email) =>
+        ref.read(notificationsProvider.notifier).onUserAuthenticated(email),
+    onUserLoggedOut: () => ref.read(notificationsProvider.notifier).clear(),
   );
 });
 
@@ -111,6 +105,25 @@ class AuthNotifier extends StateNotifier<AuthState> {
       (_) => state = const AuthState(),
     );
     onUserLoggedOut();
+  }
+
+  /// Patches the currently logged-in user's name/email in local state
+  /// right after a successful Manage Profile update, so the rest of the
+  /// app (e.g. the Profile page header) reflects the change immediately
+  /// without needing to log out and back in.
+  void updateLocalUser({String? name, String? email}) {
+    final current = state.user;
+    if (current == null) return;
+    state = state.copyWith(
+      user: AuthEntity(
+        id: current.id,
+        name: name ?? current.name,
+        email: email ?? current.email,
+        password: current.password,
+        role: current.role,
+        token: current.token,
+      ),
+    );
   }
 
   void resetState() => state = const AuthState();

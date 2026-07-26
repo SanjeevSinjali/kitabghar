@@ -69,6 +69,39 @@ class BooksRemoteDataSource implements IBooksDataSource {
     }
   }
 
+  Future<BooksHiveModel> updateBook({
+    required String id,
+    required String token,
+    String? title,
+    String? author,
+    String? price,
+    String? description,
+    String? category,
+    String? condition,
+    File? image,
+  }) async {
+    try {
+      final fields = <String, String>{};
+      if (title != null) fields['title'] = title;
+      if (author != null) fields['author'] = author;
+      if (price != null) fields['price'] = price;
+      if (description != null) fields['description'] = description;
+      if (category != null) fields['category'] = category;
+      if (condition != null) fields['condition'] = condition;
+
+      final response = await _apiClient.putMultipart(
+        '${ApiEndpoints.books}/$id',
+        fields: fields,
+        file: image,
+        fileField: image != null ? 'image' : null,
+        token: token,
+      );
+      return BooksHiveModel.fromJson(response['data']);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   @override
   Future<bool> deleteBook(String id, {required String token}) async {
     try {

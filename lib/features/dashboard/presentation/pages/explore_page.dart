@@ -47,14 +47,12 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
 
   List<BooksEntity> _filtered(List<BooksEntity> books) {
     return books.where((b) {
-      // Already-sold books shouldn't be browsable/buyable anymore.
-      final isActive = b.status == 'Active';
       final matchesCategory =
           _selectedCategory == 'All' || b.category == _selectedCategory;
       final matchesQuery = _query.isEmpty ||
           b.title.toLowerCase().contains(_query.toLowerCase()) ||
           b.author.toLowerCase().contains(_query.toLowerCase());
-      return isActive && matchesCategory && matchesQuery;
+      return matchesCategory && matchesQuery;
     }).toList();
   }
 

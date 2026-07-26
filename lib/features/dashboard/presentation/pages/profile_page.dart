@@ -1,16 +1,16 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:kitabghar/core/api/api_endpoints.dart';
 import 'package:kitabghar/core/extensions/context_extensions.dart';
-import 'package:kitabghar/core/providers/avatar_provider.dart';
-import 'package:kitabghar/core/providers/notification_provider.dart';
 import 'package:kitabghar/core/providers/theme_provider.dart';
 import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.dart';
 import 'package:kitabghar/features/books/domain/entities/books_entities.dart';
 import 'package:kitabghar/features/books/presentation/view_model/books_view_model.dart';
+import 'package:kitabghar/features/dashboard/presentation/pages/edit_listing_page.dart';
 import 'package:kitabghar/features/notifications/presentation/pages/notifications_page.dart';
+import 'package:kitabghar/features/profile/presentation/pages/manage_profile_page.dart';
+import 'package:kitabghar/features/profile/presentation/pages/security_privacy_page.dart';
+import 'package:kitabghar/features/profile/presentation/view_model/profile_view_model.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -20,8 +20,6 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfileScreen> {
-  final _picker = ImagePicker();
-
   @override
   void initState() {
     super.initState();
@@ -29,76 +27,19 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
       final token = ref.read(authViewModelProvider).user?.token;
       if (token != null && token.isNotEmpty) {
         ref.read(booksViewModelProvider.notifier).getMyBooks(token: token);
+        // Loads the real, server-stored avatar (and name/email) — this is
+        // what makes the photo persist across logout/login and reinstalls,
+        // since it's fetched fresh from the backend every time this page
+        // opens, rather than read from local-only device storage.
+        ref.read(profileViewModelProvider.notifier).getProfile(token: token);
       }
     });
   }
 
-  Future<void> _pickAvatar(String email) async {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: context.cardColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: ctx.textTertiary,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              leading: Icon(Icons.photo_library_rounded, color: ctx.textPrimary),
-              title: Text('Photo Library',
-                  style: TextStyle(color: ctx.textPrimary)),
-              onTap: () async {
-                Navigator.pop(ctx);
-                final picked = await _picker.pickImage(
-                    source: ImageSource.gallery, imageQuality: 80);
-                if (picked != null) {
-                  await ref
-                      .read(avatarProvider.notifier)
-                      .setAvatar(email, File(picked.path));
-                  await ref.read(notificationsProvider.notifier).addNotification(
-                        email,
-                        title: 'Profile Updated',
-                        message: 'Your profile picture has been updated.',
-                        type: 'profile_updated',
-                      );
-                }
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.camera_alt_rounded, color: ctx.textPrimary),
-              title: Text('Camera', style: TextStyle(color: ctx.textPrimary)),
-              onTap: () async {
-                Navigator.pop(ctx);
-                final picked = await _picker.pickImage(
-                    source: ImageSource.camera, imageQuality: 80);
-                if (picked != null) {
-                  await ref
-                      .read(avatarProvider.notifier)
-                      .setAvatar(email, File(picked.path));
-                  await ref.read(notificationsProvider.notifier).addNotification(
-                        email,
-                        title: 'Profile Updated',
-                        message: 'Your profile picture has been updated.',
-                        type: 'profile_updated',
-                      );
-                }
-              },
-            ),
-            const SizedBox(height: 12),
-          ],
-        ),
-      ),
+  void _openManageProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ManageProfilePage()),
     );
   }
 
@@ -106,11 +47,13 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authViewModelProvider);
     final booksState = ref.watch(booksViewModelProvider);
+    final profileState = ref.watch(profileViewModelProvider);
     final user = authState.user;
+    final profile = profileState.profile;
     final isDarkMode = ref.watch(themeModeProvider.notifier).isDarkMode;
-    final avatarFile = ref.watch(avatarProvider);
 
     final myListings = booksState.myBooks;
+    final avatarUrl = ApiEndpoints.avatarUrl(profile?.avatar);
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
@@ -124,26 +67,28 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: 28),
 
           // ── Avatar ──────────────────────────────────────
+          // Tapping it takes you to Manage Profile — the single place to
+          // actually change your photo, avoiding two separate upload flows.
           Center(
-            child: Stack(
-              children: [
-                CircleAvatar(
-                  radius: 48,
-                  backgroundColor: context.colors.primary.withValues(alpha: 0.15),
-                  backgroundImage:
-                      avatarFile != null ? FileImage(avatarFile) : null,
-                  child: avatarFile == null
-                      ? Icon(Icons.person_rounded,
-                          size: 52, color: context.colors.primary)
-                      : null,
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: GestureDetector(
-                    onTap: user?.email != null
-                        ? () => _pickAvatar(user!.email)
+            child: GestureDetector(
+              onTap: _openManageProfile,
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 48,
+                    backgroundColor:
+                        context.colors.primary.withValues(alpha: 0.15),
+                    backgroundImage: avatarUrl.isNotEmpty
+                        ? NetworkImage(avatarUrl)
                         : null,
+                    child: avatarUrl.isEmpty
+                        ? Icon(Icons.person_rounded,
+                            size: 52, color: context.colors.primary)
+                        : null,
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
                     child: Container(
                       width: 30,
                       height: 30,
@@ -155,12 +100,12 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
                           width: 2,
                         ),
                       ),
-                      child: const Icon(Icons.camera_alt_rounded,
-                          size: 16, color: Colors.white),
+                      child: const Icon(Icons.edit_rounded,
+                          size: 14, color: Colors.white),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -224,12 +169,17 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
             _SettingItem(
               icon: Icons.manage_accounts_outlined,
               label: 'Manage Profile',
-              onTap: () {},
+              onTap: _openManageProfile,
             ),
             _SettingItem(
               icon: Icons.security_outlined,
               label: 'Security & Privacy',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SecurityPrivacyPage()),
+                );
+              },
               isLast: true,
             ),
           ]),
@@ -450,65 +400,73 @@ class _ListingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = ApiEndpoints.bookImageUrl(book.image);
-    return Container(
-      width: 120,
-      decoration: BoxDecoration(
-        color: context.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: context.isDarkMode
-            ? null
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(12)),
-            child: imageUrl.isNotEmpty
-                ? Image.network(
-                    imageUrl,
-                    height: 100,
-                    width: 120,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => _placeholder(context),
-                  )
-                : _placeholder(context),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  book.title,
-                  style: TextStyle(
-                    color: context.textPrimary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 11,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => EditListingPage(book: book)),
+        );
+      },
+      child: Container(
+        width: 120,
+        decoration: BoxDecoration(
+          color: context.cardColor,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: context.isDarkMode
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Rs. ${book.price}',
-                  style: TextStyle(
-                    color: context.textSecondary,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 11,
-                  ),
-                ),
-              ],
+                ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(12)),
+              child: imageUrl.isNotEmpty
+                  ? Image.network(
+                      imageUrl,
+                      height: 100,
+                      width: 120,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => _placeholder(context),
+                    )
+                  : _placeholder(context),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    book.title,
+                    style: TextStyle(
+                      color: context.textPrimary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Rs. ${book.price}',
+                    style: TextStyle(
+                      color: context.textSecondary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

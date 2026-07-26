@@ -2,7 +2,7 @@ class ApiEndpoints {
   ApiEndpoints._();
 
   // Replace with your computer's current LAN IP.
-  static const String baseUrl = "http://192.168.18.119:5000/api/v1";
+  static const String baseUrl = "http://192.168.18.124:5000/api/v1";
 
   /// Host without the /api/v1 suffix — used to build URLs for uploaded
   /// files served from the backend's static folders (/avatars, /books).
@@ -38,4 +38,8 @@ class ApiEndpoints {
   static const String purchases = "$baseUrl/purchases";
   static const String khaltiInitiate = "$baseUrl/purchases/khalti/initiate";
   static const String khaltiVerify = "$baseUrl/purchases/khalti/verify";
+
+  //Re-Set
+  static const String requestPasswordChange = "$baseUrl/auth/change-password/request-code";
+  static const String confirmPasswordChange = "$baseUrl/auth/change-password/confirm";
 }

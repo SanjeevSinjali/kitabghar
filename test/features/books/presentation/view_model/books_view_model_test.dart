@@ -11,6 +11,7 @@ void main() {
   late MockGetAllBooksUseCase mockGetAllBooksUseCase;
   late MockGetMyBooksUseCase mockGetMyBooksUseCase;
   late MockCreateBooksUseCase mockCreateBooksUseCase;
+  late MockUpdateBookUseCase mockUpdateBookUseCase;
   late MockDeleteBooksUseCase mockDeleteBooksUseCase;
   late BooksNotifier notifier;
 
@@ -41,11 +42,13 @@ void main() {
     mockGetAllBooksUseCase = MockGetAllBooksUseCase();
     mockGetMyBooksUseCase = MockGetMyBooksUseCase();
     mockCreateBooksUseCase = MockCreateBooksUseCase();
+    mockUpdateBookUseCase = MockUpdateBookUseCase();
     mockDeleteBooksUseCase = MockDeleteBooksUseCase();
     notifier = BooksNotifier(
       getAllBooksUseCase: mockGetAllBooksUseCase,
       getMyBooksUseCase: mockGetMyBooksUseCase,
       createBooksUseCase: mockCreateBooksUseCase,
+      updateBookUseCase: mockUpdateBookUseCase,
       deleteBooksUseCase: mockDeleteBooksUseCase,
     );
   });

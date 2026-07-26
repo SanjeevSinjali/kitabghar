@@ -25,11 +25,13 @@ import 'package:kitabghar/features/books/domain/repositories/books_repository.da
 import 'package:kitabghar/features/books/domain/usecases/create_books_usecase.dart'
     as _i15;
 import 'package:kitabghar/features/books/domain/usecases/delete_books_usecase.dart'
-    as _i16;
+    as _i17;
 import 'package:kitabghar/features/books/domain/usecases/get_all_books_usecase.dart'
     as _i13;
 import 'package:kitabghar/features/books/domain/usecases/get_my_books_usecase.dart'
     as _i14;
+import 'package:kitabghar/features/books/domain/usecases/update_books_usecase.dart'
+    as _i16;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -206,6 +208,55 @@ class MockIBooksRepository extends _i1.Mock implements _i7.IBooksRepository {
             {
               #image: image,
               #token: token,
+            },
+          ),
+        )),
+      ) as _i4.Future<_i2.Either<_i5.Failure, _i8.BooksEntity>>);
+
+  @override
+  _i4.Future<_i2.Either<_i5.Failure, _i8.BooksEntity>> updateBook({
+    required String? id,
+    required String? token,
+    String? title,
+    String? author,
+    String? price,
+    String? description,
+    String? category,
+    String? condition,
+    _i9.File? image,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #updateBook,
+          [],
+          {
+            #id: id,
+            #token: token,
+            #title: title,
+            #author: author,
+            #price: price,
+            #description: description,
+            #category: category,
+            #condition: condition,
+            #image: image,
+          },
+        ),
+        returnValue: _i4.Future<_i2.Either<_i5.Failure, _i8.BooksEntity>>.value(
+            _FakeEither_0<_i5.Failure, _i8.BooksEntity>(
+          this,
+          Invocation.method(
+            #updateBook,
+            [],
+            {
+              #id: id,
+              #token: token,
+              #title: title,
+              #author: author,
+              #price: price,
+              #description: description,
+              #category: category,
+              #condition: condition,
+              #image: image,
             },
           ),
         )),
@@ -398,18 +449,45 @@ class MockCreateBooksUseCase extends _i1.Mock
       ) as _i4.Future<_i2.Either<_i5.Failure, _i8.BooksEntity>>);
 }
 
+/// A class which mocks [UpdateBookUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockUpdateBookUseCase extends _i1.Mock implements _i16.UpdateBookUseCase {
+  MockUpdateBookUseCase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i4.Future<_i2.Either<_i5.Failure, _i8.BooksEntity>> call(
+          _i16.UpdateBookParams? params) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #call,
+          [params],
+        ),
+        returnValue: _i4.Future<_i2.Either<_i5.Failure, _i8.BooksEntity>>.value(
+            _FakeEither_0<_i5.Failure, _i8.BooksEntity>(
+          this,
+          Invocation.method(
+            #call,
+            [params],
+          ),
+        )),
+      ) as _i4.Future<_i2.Either<_i5.Failure, _i8.BooksEntity>>);
+}
+
 /// A class which mocks [DeleteBooksUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockDeleteBooksUseCase extends _i1.Mock
-    implements _i16.DeleteBooksUseCase {
+    implements _i17.DeleteBooksUseCase {
   MockDeleteBooksUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
   _i4.Future<_i2.Either<_i5.Failure, bool>> call(
-          _i16.DeleteBooksParams? params) =>
+          _i17.DeleteBooksParams? params) =>
       (super.noSuchMethod(
         Invocation.method(
           #call,
