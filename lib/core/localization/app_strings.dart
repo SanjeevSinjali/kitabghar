@@ -37,6 +37,14 @@ class AppStrings {
     },
     'preferences': {AppLocale.en: 'Preferences', AppLocale.ne: 'प्राथमिकताहरू'},
     'notifications': {AppLocale.en: 'Notifications', AppLocale.ne: 'सूचनाहरू'},
+    'auto_brightness': {
+      AppLocale.en: 'Auto Brightness',
+      AppLocale.ne: 'स्वचालित चमक',
+    },
+    'auto_brightness_desc': {
+      AppLocale.en: 'Adjusts screen brightness and theme based on ambient light',
+      AppLocale.ne: 'वातावरणको प्रकाश अनुसार स्क्रिन चमक र थिम समायोजन गर्छ',
+    },
     'dark_mode': {AppLocale.en: 'Dark Mode', AppLocale.ne: 'डार्क मोड'},
     'language': {AppLocale.en: 'Language', AppLocale.ne: 'भाषा'},
     'support': {AppLocale.en: 'Support', AppLocale.ne: 'सहायता'},

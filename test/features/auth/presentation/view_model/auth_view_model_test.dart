@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
+import 'package:kitabghar/core/api/api_client.dart';
 import 'package:kitabghar/core/error/failures.dart';
 import 'package:kitabghar/features/auth/domain/entities/auth_entity.dart';
 import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.dart';
@@ -31,6 +32,7 @@ void main() {
       registerUseCase: mockRegisterUseCase,
       loginUseCase: mockLoginUseCase,
       logoutUseCase: mockLogoutUseCase,
+      apiClient: ApiClient(),
       // No-op callbacks — the notification/avatar systems aren't under
       // test here, we're only testing AuthNotifier's own state transitions.
       onUserAuthenticated: (_) async {},

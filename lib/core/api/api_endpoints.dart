@@ -21,8 +21,11 @@ class ApiEndpoints {
   // Auth
   static const String register = "$baseUrl/auth/register";
   static const String login = "$baseUrl/auth/login";
+  static const String googleAuth = "$baseUrl/auth/google";
   static const String whoami = "$baseUrl/auth/whoami";
   static const String updateProfile = "$baseUrl/auth/update";
+  static const String requestPasswordChange = "$baseUrl/auth/change-password/request-code";
+  static const String confirmPasswordChange = "$baseUrl/auth/change-password/confirm";
 
   // Books
   static const String books = "$baseUrl/books";
@@ -38,8 +41,4 @@ class ApiEndpoints {
   static const String purchases = "$baseUrl/purchases";
   static const String khaltiInitiate = "$baseUrl/purchases/khalti/initiate";
   static const String khaltiVerify = "$baseUrl/purchases/khalti/verify";
-
-  //Re-Set
-  static const String requestPasswordChange = "$baseUrl/auth/change-password/request-code";
-  static const String confirmPasswordChange = "$baseUrl/auth/change-password/confirm";
 }

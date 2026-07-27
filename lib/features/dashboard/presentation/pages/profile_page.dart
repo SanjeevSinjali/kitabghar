@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kitabghar/core/api/api_endpoints.dart';
 import 'package:kitabghar/core/extensions/context_extensions.dart';
 import 'package:kitabghar/core/localization/app_strings.dart';
+import 'package:kitabghar/core/providers/light_sensor_provider.dart';
 import 'package:kitabghar/core/providers/locale_provider.dart';
 import 'package:kitabghar/core/providers/theme_provider.dart';
 import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.dart';
@@ -193,7 +194,7 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: myListings.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 12),
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
                 itemBuilder: (context, index) {
                   final book = myListings[index];
                   return _ListingCard(book: book);
@@ -239,6 +240,20 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
                   context,
                   MaterialPageRoute(builder: (_) => const NotificationsPage()),
                 );
+              },
+            ),
+            _SettingItem(
+              icon: Icons.brightness_auto_rounded,
+              label: t('auto_brightness'),
+              trailing: Switch(
+                value: ref.watch(autoLightProvider),
+                onChanged: (_) {
+                  ref.read(autoLightProvider.notifier).toggle();
+                },
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              onTap: () {
+                ref.read(autoLightProvider.notifier).toggle();
               },
             ),
             _SettingItem(
@@ -477,7 +492,7 @@ class _ListingCard extends StatelessWidget {
                       height: 100,
                       width: 120,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => _placeholder(context),
+                      errorBuilder: (_, __, ___) => _placeholder(context),
                     )
                   : _placeholder(context),
             ),

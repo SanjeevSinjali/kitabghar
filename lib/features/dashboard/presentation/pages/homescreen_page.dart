@@ -61,8 +61,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final accent = context.colors.primary;
     final booksState = ref.watch(booksViewModelProvider);
     final books = _filtered(booksState.books);
-    // "Trending" = the most recently added books, capped at 10.
-    final trending = books.take(10).toList();
+    // "Trending" is a fixed, hand-picked set — always these exact books,
+    // completely independent of the category filter chips above (unlike
+    // "All Listings", which does respect the filter).
+    const trendingTitles = {
+      "You Don't Know JS Yet: Get Started",
+      'Code Complete',
+    };
+    final trending = booksState.books
+        .where((b) => trendingTitles.contains(b.title))
+        .toList();
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
@@ -107,7 +115,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Good morning 👋',
+                      Text('Good morning',
                           style: TextStyle(fontSize: 13, color: context.textSecondary)),
                       const SizedBox(height: 2),
                       Text('Find your next read',

@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kitabghar/core/api/api_client.dart';
+import 'package:kitabghar/core/api/api_endpoints.dart';
 import 'package:kitabghar/core/providers/notification_provider.dart';
 import 'package:kitabghar/core/services/hive/hive_service.dart';
 import 'package:kitabghar/features/auth/data/datasources/local/auth_local_datasource.dart';
@@ -48,6 +50,7 @@ final authViewModelProvider =
     registerUseCase: ref.read(registerUseCaseProvider),
     loginUseCase: ref.read(loginUseCaseProvider),
     logoutUseCase: ref.read(logoutUseCaseProvider),
+    apiClient: ref.read(apiClientProvider),
     onUserAuthenticated: (email) =>
         ref.read(notificationsProvider.notifier).onUserAuthenticated(email),
     onUserLoggedOut: () => ref.read(notificationsProvider.notifier).clear(),
@@ -58,18 +61,29 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final RegisterUseCase _registerUseCase;
   final LoginUseCase _loginUseCase;
   final LogoutUseCase _logoutUseCase;
+  final ApiClient _apiClient;
   final Future<void> Function(String email) onUserAuthenticated;
   final void Function() onUserLoggedOut;
+
+  // This is the same web OAuth client ID your backend already verifies
+  // Google ID tokens against (GOOGLE_CLIENT_ID in kitabghar_backend's
+  // .env) — OAuth client IDs are public identifiers meant to be embedded
+  // in client apps, unlike secrets, so hardcoding this here is correct
+  // and standard practice.
+  static const String _googleServerClientId =
+      '184221386512-n3sn5d94th2ku7b1nth0p0o3b8cgvslv.apps.googleusercontent.com';
 
   AuthNotifier({
     required RegisterUseCase registerUseCase,
     required LoginUseCase loginUseCase,
     required LogoutUseCase logoutUseCase,
+    required ApiClient apiClient,
     required this.onUserAuthenticated,
     required this.onUserLoggedOut,
   })  : _registerUseCase = registerUseCase,
         _loginUseCase = loginUseCase,
         _logoutUseCase = logoutUseCase,
+        _apiClient = apiClient,
         super(const AuthState());
 
   Future<void> register(AuthEntity entity) async {
@@ -105,6 +119,60 @@ class AuthNotifier extends StateNotifier<AuthState> {
       (_) => state = const AuthState(),
     );
     onUserLoggedOut();
+  }
+
+  /// Signs in with Google, gets back an ID token, and sends it to the
+  /// backend's existing POST /auth/google endpoint (the same one the web
+  /// app already uses) — no backend changes needed, since the audience
+  /// check there just validates against GOOGLE_CLIENT_ID either way.
+  Future<void> loginWithGoogle() async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      final googleSignIn = GoogleSignIn(
+        serverClientId: _googleServerClientId,
+      );
+
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        // User cancelled the Google sign-in sheet.
+        state = state.copyWith(isLoading: false);
+        return;
+      }
+
+      final googleAuth = await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+      if (idToken == null) {
+        state = state.copyWith(
+          isLoading: false,
+          error: 'Could not get a Google ID token. Please try again.',
+        );
+        return;
+      }
+
+      final response = await _apiClient.post(
+        ApiEndpoints.googleAuth,
+        body: {'idToken': idToken},
+      );
+
+      final userJson = response['user'];
+      final user = AuthEntity(
+        id: userJson['id'] ?? '',
+        name: userJson['name'] ?? '',
+        email: userJson['email'] ?? '',
+        password: '',
+        role: userJson['role'] ?? 'user',
+        token: response['token'],
+      );
+
+      state = state.copyWith(isLoading: false, isSuccess: true, user: user);
+      await onUserAuthenticated(user.email);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Google sign-in failed: ${e.toString()}',
+      );
+    }
   }
 
   /// Patches the currently logged-in user's name/email in local state

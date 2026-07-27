@@ -34,6 +34,67 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
+  void _continueWithGoogle() {
+    ref.read(authViewModelProvider.notifier).loginWithGoogle();
+  }
+
+  void _showLoginErrorDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.lock_outline_rounded,
+                  color: Colors.redAccent, size: 28),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Password incorrect',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'The email or password you entered is incorrect. Please try again.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, color: Colors.black54),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(ctx),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                ),
+                child: const Text(
+                  'Got it',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   InputDecoration _fieldDecoration(String hint, IconData icon) =>
       InputDecoration(
         hintText: hint,
@@ -57,7 +118,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         Navigator.pushReplacementNamed(context, '/dashboard');
       }
       if (next.error != null) {
-        SnackbarUtils.showError(context, next.error!);
+        _showLoginErrorDialog(context);
         ref.read(authViewModelProvider.notifier).resetState();
       }
     });
@@ -205,7 +266,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         Padding(
                           padding:
                               const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text('Or login with',
+                          child: Text('Or continue with',
                               style: TextStyle(
                                   fontSize: 13,
                                   color: Colors.grey.shade500)),
@@ -214,16 +275,36 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             child: Divider(color: Colors.black26)),
                       ]),
                       const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _gmailButton(),
-                          const SizedBox(width: 16),
-                          _socialButton(Icons.apple, Colors.black),
-                          const SizedBox(width: 16),
-                          _socialButton(
-                              Icons.facebook, const Color(0xFF1877F2)),
-                        ],
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed:
+                              authState.isLoading ? null : _continueWithGoogle,
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 14),
+                            side: const BorderSide(color: Colors.black26),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/images/google_logo.png',
+                                width: 20,
+                                height: 20,
+                              ),
+                              const SizedBox(width: 10),
+                              const Text('Continue with Google',
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87)),
+                            ],
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 24),
                       Row(
@@ -255,28 +336,4 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       ),
     );
   }
-
-  Widget _gmailButton() => Container(
-        width: 52,
-        height: 52,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white,
-          border: Border.all(color: Colors.black12),
-        ),
-        child: const Center(
-          child: Text('G',
-              style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFFEA4335))),
-        ),
-      );
-
-  Widget _socialButton(IconData icon, Color color) => Container(
-        width: 52,
-        height: 52,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-        child: Icon(icon, color: Colors.white, size: 26),
-      );
 }
