@@ -94,7 +94,10 @@ class _EditListingPageState extends ConsumerState<EditListingPage> {
               onTap: () async {
                 Navigator.pop(ctx);
                 final picked = await _picker.pickImage(
-                    source: ImageSource.gallery, imageQuality: 85);
+                  source: ImageSource.gallery,
+                  imageQuality: 60,
+                  maxWidth: 1200,
+                );
                 if (picked != null) setState(() => _newImage = File(picked.path));
               },
             ),
@@ -104,7 +107,10 @@ class _EditListingPageState extends ConsumerState<EditListingPage> {
               onTap: () async {
                 Navigator.pop(ctx);
                 final picked = await _picker.pickImage(
-                    source: ImageSource.camera, imageQuality: 85);
+                  source: ImageSource.camera,
+                  imageQuality: 60,
+                  maxWidth: 1200,
+                );
                 if (picked != null) setState(() => _newImage = File(picked.path));
               },
             ),

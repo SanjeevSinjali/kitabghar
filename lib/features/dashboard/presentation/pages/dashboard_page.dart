@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kitabghar/core/extensions/context_extensions.dart';
+import 'package:kitabghar/core/localization/app_strings.dart';
+import 'package:kitabghar/core/providers/locale_provider.dart';
 import 'package:kitabghar/core/providers/notification_provider.dart';
 import 'package:kitabghar/features/dashboard/presentation/pages/explore_page.dart';
 import 'package:kitabghar/features/dashboard/presentation/pages/homescreen_page.dart';
@@ -31,10 +33,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   Widget build(BuildContext context) {
     final accent = context.colors.primary;
     final unreadCount = ref.watch(unreadNotificationsCountProvider);
+    final locale = ref.watch(localeProvider);
+    String t(String key) => AppStrings.of(key, locale);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('KitabGhar'),
+        title: Text(t('app_name')),
         actions: [
           if (_currentIndex != 4)
             Padding(
@@ -44,7 +48,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.notifications_none_rounded),
-                    tooltip: 'Notifications',
+                    tooltip: t('notifications'),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -107,31 +111,31 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           fontWeight: FontWeight.w400,
           fontSize: 11,
         ),
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Home',
+            icon: const Icon(Icons.home_outlined),
+            activeIcon: const Icon(Icons.home),
+            label: t('nav_home'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search_outlined),
-            activeIcon: Icon(Icons.search),
-            label: 'Explore',
+            icon: const Icon(Icons.search_outlined),
+            activeIcon: const Icon(Icons.search),
+            label: t('nav_explore'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long_outlined),
-            activeIcon: Icon(Icons.receipt_long),
-            label: 'Purchases',
+            icon: const Icon(Icons.receipt_long_outlined),
+            activeIcon: const Icon(Icons.receipt_long),
+            label: t('nav_purchases'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_outline),
-            activeIcon: Icon(Icons.favorite),
-            label: 'Favourite',
+            icon: const Icon(Icons.favorite_outline),
+            activeIcon: const Icon(Icons.favorite),
+            label: t('nav_favourite'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
+            icon: const Icon(Icons.person_outline),
+            activeIcon: const Icon(Icons.person),
+            label: t('nav_profile'),
           ),
         ],
       ),

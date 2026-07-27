@@ -72,7 +72,10 @@ class _ManageProfilePageState extends ConsumerState<ManageProfilePage> {
               onTap: () async {
                 Navigator.pop(ctx);
                 final picked = await _picker.pickImage(
-                    source: ImageSource.gallery, imageQuality: 80);
+                  source: ImageSource.gallery,
+                  imageQuality: 50,
+                  maxWidth: 800,
+                );
                 if (picked != null) {
                   setState(() => _pickedAvatar = File(picked.path));
                 }
@@ -84,7 +87,10 @@ class _ManageProfilePageState extends ConsumerState<ManageProfilePage> {
               onTap: () async {
                 Navigator.pop(ctx);
                 final picked = await _picker.pickImage(
-                    source: ImageSource.camera, imageQuality: 80);
+                  source: ImageSource.camera,
+                  imageQuality: 50,
+                  maxWidth: 800,
+                );
                 if (picked != null) {
                   setState(() => _pickedAvatar = File(picked.path));
                 }

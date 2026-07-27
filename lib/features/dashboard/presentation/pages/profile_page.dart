@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kitabghar/core/api/api_endpoints.dart';
 import 'package:kitabghar/core/extensions/context_extensions.dart';
+import 'package:kitabghar/core/localization/app_strings.dart';
+import 'package:kitabghar/core/providers/locale_provider.dart';
 import 'package:kitabghar/core/providers/theme_provider.dart';
 import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.dart';
 import 'package:kitabghar/features/books/domain/entities/books_entities.dart';
@@ -43,6 +45,43 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
     );
   }
 
+  void _showLanguagePicker(BuildContext context, WidgetRef ref, AppLocale locale) {
+    String t(String key) => AppStrings.of(key, locale);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: context.cardColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(t('select_language'), style: TextStyle(color: context.textPrimary)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<AppLocale>(
+              value: AppLocale.en,
+              groupValue: locale,
+              title: Text(t('english'), style: TextStyle(color: context.textPrimary)),
+              activeColor: context.colors.primary,
+              onChanged: (value) {
+                ref.read(localeProvider.notifier).setLocale(AppLocale.en);
+                Navigator.pop(ctx);
+              },
+            ),
+            RadioListTile<AppLocale>(
+              value: AppLocale.ne,
+              groupValue: locale,
+              title: Text(t('nepali'), style: TextStyle(color: context.textPrimary)),
+              activeColor: context.colors.primary,
+              onChanged: (value) {
+                ref.read(localeProvider.notifier).setLocale(AppLocale.ne);
+                Navigator.pop(ctx);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authViewModelProvider);
@@ -51,6 +90,8 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
     final user = authState.user;
     final profile = profileState.profile;
     final isDarkMode = ref.watch(themeModeProvider.notifier).isDarkMode;
+    final locale = ref.watch(localeProvider);
+    String t(String key) => AppStrings.of(key, locale);
 
     final myListings = booksState.myBooks;
     final avatarUrl = ApiEndpoints.avatarUrl(profile?.avatar);
@@ -59,7 +100,7 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
       backgroundColor: context.backgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Profile'),
+        title: Text(t('profile_title')),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -129,7 +170,7 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: 32),
 
           // ── My Listings ──────────────────────────────────
-          _SectionLabel(label: 'My Listings'),
+          _SectionLabel(label: t('my_listings')),
           const SizedBox(height: 12),
 
           if (myListings.isEmpty)
@@ -141,7 +182,7 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
               ),
               child: Center(
                 child: Text(
-                  'No listings yet. Sell your first book!',
+                  t('no_listings'),
                   style: TextStyle(color: context.textTertiary, fontSize: 13),
                 ),
               ),
@@ -163,17 +204,17 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: 28),
 
           // ── Account ──────────────────────────────────────
-          _SectionLabel(label: 'Account'),
+          _SectionLabel(label: t('account')),
           const SizedBox(height: 10),
           _SettingsGroup(items: [
             _SettingItem(
               icon: Icons.manage_accounts_outlined,
-              label: 'Manage Profile',
+              label: t('manage_profile'),
               onTap: _openManageProfile,
             ),
             _SettingItem(
               icon: Icons.security_outlined,
-              label: 'Security & Privacy',
+              label: t('security_privacy'),
               onTap: () {
                 Navigator.push(
                   context,
@@ -187,12 +228,12 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: 20),
 
           // ── Preferences ──────────────────────────────────
-          _SectionLabel(label: 'Preferences'),
+          _SectionLabel(label: t('preferences')),
           const SizedBox(height: 10),
           _SettingsGroup(items: [
             _SettingItem(
               icon: Icons.notifications_none_rounded,
-              label: 'Notifications',
+              label: t('notifications'),
               onTap: () {
                 Navigator.push(
                   context,
@@ -204,7 +245,7 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
               icon: isDarkMode
                   ? Icons.dark_mode_rounded
                   : Icons.dark_mode_outlined,
-              label: 'Dark Mode',
+              label: t('dark_mode'),
               trailing: Switch(
                 value: isDarkMode,
                 onChanged: (value) {
@@ -218,12 +259,12 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
             ),
             _SettingItem(
               icon: Icons.translate_rounded,
-              label: 'Language',
+              label: t('language'),
               trailing: Text(
-                'English',
+                locale == AppLocale.ne ? t('nepali') : t('english'),
                 style: TextStyle(color: context.textTertiary, fontSize: 13),
               ),
-              onTap: () {},
+              onTap: () => _showLanguagePicker(context, ref, locale),
               isLast: true,
             ),
           ]),
@@ -231,22 +272,22 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: 20),
 
           // ── Support ──────────────────────────────────────
-          _SectionLabel(label: 'Support'),
+          _SectionLabel(label: t('support')),
           const SizedBox(height: 10),
           _SettingsGroup(items: [
             _SettingItem(
               icon: Icons.help_outline_rounded,
-              label: 'Help Center',
+              label: t('help_center'),
               onTap: () {},
             ),
             _SettingItem(
               icon: Icons.description_outlined,
-              label: 'Terms & Policies',
+              label: t('terms_policies'),
               onTap: () {},
             ),
             _SettingItem(
               icon: Icons.info_outline_rounded,
-              label: 'About Us',
+              label: t('about_us'),
               onTap: () {},
               isLast: true,
             ),
@@ -258,11 +299,11 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
           _SettingsGroup(items: [
             _SettingItem(
               icon: Icons.logout_rounded,
-              label: 'Log Out',
+              label: t('log_out'),
               iconColor: context.colors.error,
               labelColor: context.colors.error,
               onTap: () {
-                _confirmLogout(context, ref, user?.email);
+                _confirmLogout(context, ref, user?.email, locale);
               },
               isLast: true,
             ),
@@ -274,21 +315,23 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  void _confirmLogout(BuildContext context, WidgetRef ref, String? email) {
+  void _confirmLogout(
+      BuildContext context, WidgetRef ref, String? email, AppLocale locale) {
+    String t(String key) => AppStrings.of(key, locale);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: context.cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Log Out', style: TextStyle(color: context.textPrimary)),
+        title: Text(t('log_out'), style: TextStyle(color: context.textPrimary)),
         content: Text(
-          'Are you sure you want to log out?',
+          t('log_out_confirm_message'),
           style: TextStyle(color: context.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: TextStyle(color: context.textSecondary)),
+            child: Text(t('cancel'), style: TextStyle(color: context.textSecondary)),
           ),
           TextButton(
             onPressed: () {
@@ -299,7 +342,7 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
               Navigator.of(context)
                   .pushNamedAndRemoveUntil('/login', (route) => false);
             },
-            child: Text('Log Out', style: TextStyle(color: context.colors.error)),
+            child: Text(t('log_out'), style: TextStyle(color: context.colors.error)),
           ),
         ],
       ),

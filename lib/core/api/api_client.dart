@@ -242,6 +242,9 @@ class ApiClient {
         throw Exception(data['message'] ?? 'Something went wrong');
       }
     } catch (e) {
+      if (response.body.contains('File too large')) {
+        throw Exception('File is too large. Please choose a smaller image.');
+      }
       throw Exception('Invalid response from server: ${response.body}');
     }
   }
@@ -300,6 +303,9 @@ class ApiClient {
         throw Exception(data['message'] ?? 'Something went wrong');
       }
     } catch (e) {
+      if (response.body.contains('File too large')) {
+        throw Exception('File is too large. Please choose a smaller image.');
+      }
       throw Exception('Invalid response from server: ${response.body}');
     }
   }

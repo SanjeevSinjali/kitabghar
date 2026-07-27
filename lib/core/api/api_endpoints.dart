@@ -2,7 +2,7 @@ class ApiEndpoints {
   ApiEndpoints._();
 
   // Replace with your computer's current LAN IP.
-  static const String baseUrl = "http://192.168.18.124:5000/api/v1";
+  static const String baseUrl = "http://192.168.2.1:5000/api/v1";
 
   /// Host without the /api/v1 suffix — used to build URLs for uploaded
   /// files served from the backend's static folders (/avatars, /books).
