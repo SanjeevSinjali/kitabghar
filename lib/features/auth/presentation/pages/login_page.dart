@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kitabghar/core/services/auth/remember_me_service.dart';
 import 'package:kitabghar/core/utils/snackbar_utils.dart';
+import 'package:kitabghar/features/auth/presentation/pages/recover_password_page.dart';
 import 'package:kitabghar/features/auth/presentation/pages/signup_page.dart';
 import 'package:kitabghar/features/auth/presentation/view_model/auth_view_model.dart';
 
@@ -17,6 +19,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _passwordCtrl = TextEditingController();
   bool _obscure = true;
   bool _rememberMe = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRememberedCredentials();
+  }
+
+  Future<void> _loadRememberedCredentials() async {
+    final saved = await ref.read(rememberMeServiceProvider).load();
+    if (saved != null && mounted) {
+      setState(() {
+        _emailCtrl.text = saved.email;
+        _passwordCtrl.text = saved.password;
+        _rememberMe = true;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -114,6 +133,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     ref.listen(authViewModelProvider, (previous, next) {
       if (next.isSuccess && next.user != null) {
+        // Save or clear remembered credentials based on the checkbox,
+        // only once we know login actually succeeded.
+        final rememberMeService = ref.read(rememberMeServiceProvider);
+        if (_rememberMe) {
+          rememberMeService.save(
+            email: _emailCtrl.text.trim(),
+            password: _passwordCtrl.text.trim(),
+          );
+        } else {
+          rememberMeService.clear();
+        }
+
         SnackbarUtils.showSuccess(context, 'Logged in successfully!');
         Navigator.pushReplacementNamed(context, '/dashboard');
       }
@@ -223,7 +254,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                     fontSize: 13, color: Colors.black54)),
                           ]),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const RecoverPasswordPage()),
+                              );
+                            },
                             child: const Text('Forgot Password ?',
                                 style: TextStyle(
                                     fontSize: 13,

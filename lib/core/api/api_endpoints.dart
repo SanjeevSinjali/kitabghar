@@ -41,4 +41,8 @@ class ApiEndpoints {
   static const String purchases = "$baseUrl/purchases";
   static const String khaltiInitiate = "$baseUrl/purchases/khalti/initiate";
   static const String khaltiVerify = "$baseUrl/purchases/khalti/verify";
+
+  //Forgot Password
+  static const String forgotPassword = "$baseUrl/auth/forgot-password";
+  static const String resetPasswordWithCode = "$baseUrl/auth/reset-password";
 }

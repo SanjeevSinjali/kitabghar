@@ -49,6 +49,7 @@ dependencies:
   camera: ^0.11.0+2
   screen_brightness: ^1.0.1
   google_sign_in: ^6.2.1
+  flutter_secure_storage: ^9.2.2
 
 dev_dependencies:
   flutter_test:
@@ -65,6 +66,13 @@ dev_dependencies:
   analyzer: ^6.4.1
   flutter_launcher_icons: ^0.14.4
   mockito: ^5.4.4
+
+flutter_launcher_icons:
+  image_path: "assets/images/logo.png"
+  ios: true
+  android: true
+  remove_alpha_ios: true
+  background_color_ios: "#FFFFFF"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -194,7 +194,7 @@ class _ProfilePageState extends ConsumerState<ProfileScreen> {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: myListings.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                separatorBuilder: (_, _) => const SizedBox(width: 12),
                 itemBuilder: (context, index) {
                   final book = myListings[index];
                   return _ListingCard(book: book);
@@ -492,7 +492,7 @@ class _ListingCard extends StatelessWidget {
                       height: 100,
                       width: 120,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _placeholder(context),
+                      errorBuilder: (_, _, _) => _placeholder(context),
                     )
                   : _placeholder(context),
             ),

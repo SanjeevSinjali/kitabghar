@@ -6,7 +6,6 @@ import 'package:kitabghar/features/books/domain/entities/books_entities.dart';
 import 'package:kitabghar/features/books/presentation/view_model/books_view_model.dart';
 import 'package:kitabghar/features/books/presentation/widgets/book_card.dart';
 import 'package:kitabghar/features/books/presentation/widgets/book_detail_sheet.dart';
-import 'package:kitabghar/features/dashboard/presentation/pages/sell_page.dart';
 import 'package:kitabghar/features/wishlist/presentation/view_model/wishlist_view_model.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -75,32 +74,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       backgroundColor: context.backgroundColor,
 
-      // ── Sell FAB ──────────────────────────────────────
-      floatingActionButton: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const SellPage()),
-          );
-        },
-        child: Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: accent,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: accent.withValues(alpha: 0.35),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
-        ),
-      ),
-
       body: SafeArea(
         child: RefreshIndicator(
           color: accent,
@@ -115,7 +88,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Good morning',
+                      Text('Good morning 👋',
                           style: TextStyle(fontSize: 13, color: context.textSecondary)),
                       const SizedBox(height: 2),
                       Text('Find your next read',
