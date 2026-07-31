@@ -45,6 +45,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     }
   }
 
+  void _continueWithGoogle() {
+    ref.read(authViewModelProvider.notifier).loginWithGoogle();
+  }
+
   InputDecoration _fieldDecoration(String hint, IconData icon,
           {Widget? suffix}) =>
       InputDecoration(
@@ -62,17 +66,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
-      );
-
-  Widget _socialButton(IconData icon, Color color) => Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color,
-          border: Border.all(color: Colors.black12),
-        ),
-        child: Icon(icon, color: Colors.white, size: 24),
       );
 
   @override
@@ -258,28 +251,51 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                               child: Divider(color: Colors.black26)),
                           Padding(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10),
+                                horizontal: 12),
                             child: Text('Or Sign up with',
                                 style: TextStyle(
-                                    fontSize: 12.5,
+                                    fontSize: 13,
                                     color: Colors.grey.shade500)),
                           ),
                           const Expanded(
                               child: Divider(color: Colors.black26)),
                         ],
                       ),
-                      const SizedBox(height: 14),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _socialButton(
-                              Icons.g_mobiledata, Colors.red),
-                          const SizedBox(width: 14),
-                          _socialButton(Icons.apple, Colors.black),
-                          const SizedBox(width: 14),
-                          _socialButton(Icons.facebook,
-                              const Color(0xFF1877F2)),
-                        ],
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: authState.isLoading
+                              ? null
+                              : _continueWithGoogle,
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 14),
+                            side: const BorderSide(
+                                color: Colors.black26),
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(12)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/images/google_logo.png',
+                                width: 20,
+                                height: 20,
+                              ),
+                              const SizedBox(width: 10),
+                              const Text('Continue with Google',
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87)),
+                            ],
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 18),
                       Row(
